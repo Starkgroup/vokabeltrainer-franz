@@ -42,7 +42,6 @@ function initializeApp() {
     let isAwaitingAnswer = true;
 
     const taskElement = document.getElementById('task');
-    const userAnswerElement = document.getElementById('userAnswer');
     const submitButton = document.getElementById('submitAnswer');
     const nextButton = document.getElementById('nextQuestion');
     const explanationContainer = document.getElementById('explanationContainer');
@@ -56,16 +55,31 @@ function initializeApp() {
     submitButton.addEventListener('click', submitAnswer);
     nextButton.addEventListener('click', loadNextQuestion);
 
-    userAnswerElement.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
+    const userForm = document.getElementById('userForm');
+    const userAnswerElement = document.getElementById('userAnswer');
+    
+    userAnswerElement.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && !event.shiftKey && isAwaitingAnswer) {
+            event.preventDefault(); // Verhindert den Zeilenumbruch
             submitAnswer();
+    
+            // Tastatur auf iOS schließen
             userAnswerElement.blur();
+    
+            // Alternativ: Fokus auf verstecktes Input setzen
+            /*
             const hiddenInput = document.getElementById('hiddenInput');
             hiddenInput.focus();
             hiddenInput.blur();
+            */
         }
     });
+
+    userForm.addEventListener('submit', function(event) {
+        event.preventDefault(); // Verhindert das Neuladen der Seite
+        // Falls nötig, weitere Aktionen hier hinzufügen
+    });
+    
 
     loadNextQuestion();
 

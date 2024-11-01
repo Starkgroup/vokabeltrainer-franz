@@ -41,7 +41,7 @@ header h1 {
     width: 2em;
     height: 2em;
     text-align: center;
-    padding: 0;
+    padding: 0 5px;
 }
 
 .buttons button.red {

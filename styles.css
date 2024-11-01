@@ -77,8 +77,8 @@ main {
     font-size: 16px;
     line-height: 1.5;
     height: 5.5em;
+    min-height: 5.5em;
     overflow-y: auto;
-    resize: none;
     border-radius: 5px;
     border-color: lightgray;
 }

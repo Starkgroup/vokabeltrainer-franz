@@ -156,14 +156,14 @@ function initializeApp() {
         let methods = [];
         if (isSentence) {
             methods = [
-                `Lasse eine schwierige Vokabel (einzelne oder zusammengesetzte Wörter) in diesem Satz weg: ${word} - Ersetze das wort mit '...........' und bitte den Nutzer, die Lücke zu füllen und gib als Hinweis die deutsche Übersetzung des in der Lücke fehlenden Wortes. Die Aufgabenstellung darf nicht die Antwort enthalten!`,
-                `Frage den Nutzer nach der sinngemäßen Übersetzung des Satzes aus dem Deutschen ins Französische: "${word}". Die Aufgabenstellung darf nicht die Antwort '${word}' enthalten!`
+                `Lasse eine schwierige Vokabel (einzelne oder zusammengesetzte Wörter) in diesem Satz weg: ${word} - Ersetze das wort mit '...........' und bitte auf Deutsch den Nutzer, die Lücke zu füllen und gib als Hinweis die deutsche Übersetzung des in der Lücke fehlenden Wortes. Die Aufgabenstellung darf nicht die Antwort enthalten!`,
+                `Frage den Nutzer auf Deutsch nach der sinngemäßen Übersetzung des Satzes aus dem Deutschen ins Französische: "${word}". Die Aufgabenstellung darf nicht die Antwort '${word}' enthalten!`
             ];
         } else {
             methods = [
-                `Der Nutzer möchte die französische Vokabel '${word}' üben. Bilde einen deutschen Satz mit der Übersetzung und formuliere eine Bitte an den Nutzer, diesen Satz ins Französische zu übersetzen. Die Aufgabenstellung darf nicht die Vokabel '${word}' enthalten!`,
-                `Formuliere eine Bitte an den Nutzer, ${word} aus dem Französischen ins Deutsche zu übersetzen. Die Aufgabenstellung muss das Wort '${word}' enthalten (ist das Wort ein Nomen, verwende es mit korrektem französischem Artikel)!`,
-                `Formuliere eine Bitte an den Nutzer, die sinngemäße Übersetzung der französischen Vokabel '${word}' aus dem Deutschen ins Französische zu übersetzen. Die Aufgabenstellung darf nicht die Antwort '${word}' enthalten. Die Aufgabenstellung muss die deutsche Übersetzung als Wort enthalten!`
+                `Der Nutzer möchte die französische Vokabel '${word}' üben. Bilde einen deutschen Satz mit der Übersetzung und formuliere auf Deutsch eine Bitte an den Nutzer, diesen Satz ins Französische zu übersetzen. Die Aufgabenstellung darf nicht die Vokabel '${word}' enthalten!`,
+                `Formuliere auf Deutsch eine Bitte an den Nutzer, ${word} aus dem Französischen ins Deutsche zu übersetzen. Die Aufgabenstellung muss das Wort '${word}' enthalten (ist das Wort ein Nomen, verwende es mit korrektem französischem Artikel)!`,
+                `Formuliere auf Deutsch eine Bitte an den Nutzer, die sinngemäße Übersetzung der französischen Vokabel '${word}' aus dem Deutschen ins Französische zu übersetzen. Die Aufgabenstellung darf nicht die Antwort '${word}' enthalten. Die Aufgabenstellung muss die deutsche Übersetzung als Wort enthalten!`
             ];
         }
         const method = methods[Math.floor(Math.random() * methods.length)];

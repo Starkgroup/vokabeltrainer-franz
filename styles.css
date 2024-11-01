@@ -39,6 +39,7 @@ header h1 {
     border-radius: 5px;
     width: 2em;
     height: 2em;
+    text-align: center;
 }
 
 .buttons button.red {

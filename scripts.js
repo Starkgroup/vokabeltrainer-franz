@@ -56,10 +56,14 @@ function initializeApp() {
     submitButton.addEventListener('click', submitAnswer);
     nextButton.addEventListener('click', loadNextQuestion);
 
-    userAnswerElement.addEventListener('keydown', function(event) {
+    userAnswerElement.addEventListener('keydown', function (event) {
         if (event.key === 'Enter') {
-            event.preventDefault(); 
+            event.preventDefault();
             submitAnswer();
+            userAnswerElement.blur();
+            const hiddenInput = document.getElementById('hiddenInput');
+            hiddenInput.focus();
+            hiddenInput.blur();
         }
     });
 
@@ -122,13 +126,13 @@ function initializeApp() {
         } else {
             console.error('Vokabelliste ist nicht verfügbar oder ungültig.');
         }
-    
+
         // Buttons und Felder wieder einblenden
         submitButton.style.display = 'inline-block';
         userAnswerElement.style.display = 'block';
         document.getElementById('skipVocab').style.display = 'inline-block';
         restartButton.style.display = 'none';
-    
+
         // Nächste Frage laden
         loadNextQuestion();
     }

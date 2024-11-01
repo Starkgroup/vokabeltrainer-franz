@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vokabeltrainer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Alors...</h1>
+            <div class="buttons">
+                <button class="orange" id="addVocab">✚</button>
+                <button id="skipVocab" class="green" id="skipVocab">✓</button>
+                <!--button class="red" id="shuffleVocab"></button-->
+                <button class="blue" id="restartButton" style="display: none;">⏎</button>
+            </div>
+        </header>
+
+        <main>
+            <div id="taskContainer">
+                <p id="task">Lade Aufgabe...</p>
+            </div>
+            <textarea id="userAnswer" placeholder="Deine Antwort"></textarea>
+            <div class="action-buttons">
+                <button id="submitAnswer">►</button>
+                <button id="nextQuestion" style="display: none;">►►</button>
+            </div>
+            <div id="explanationContainer" style="display: none;">
+                <p id="explanation"></p>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2>API-Schlüssel erforderlich</h2>
+            <p>Bitte gib deinen OpenAI API-Schlüssel ein:</p>
+            <input type="password" id="apiKeyInput" placeholder="API-Schlüssel">
+            <button id="saveApiKey">Speichern</button>
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>

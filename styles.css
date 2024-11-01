@@ -1,0 +1,167 @@
+/* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.3em;
+    overflow-x: hidden;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.container {
+    max-width: 600px;
+    padding: 20px;
+    margin: 0 auto;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.buttons button {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-left: 8px;
+    cursor: pointer;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    width: 2em;
+    height: 2em;
+}
+
+.buttons button.red {
+    background-color: darkred;
+}
+
+.buttons button.green {
+    background-color: darkslategray;
+}
+
+.buttons button.blue {
+    background-color: darkblue;
+}
+
+.buttons button.orange {
+    background-color: darkorange;
+}
+
+
+main {
+    margin-top: 20px;
+}
+
+#taskContainer {
+    margin-top: 10px;
+    min-height: 5.5em;
+}
+
+
+#userAnswer {
+    width: calc(100vw - 60px);
+    max-width: calc(600px - 20px);
+    padding: 10px;
+    font-size: 16px;
+    line-height: 1.5;
+    height: auto;
+    max-height: calc(1.5em * 2);
+    overflow-y: auto;
+    resize: none;
+    border-radius: 5px;
+    border-color: lightgray;
+}
+
+.action-buttons {
+    position: fixed;
+    bottom: 0;
+    margin-bottom: 10px;
+}
+
+.action-buttons button {
+    font-size: 24px;
+    padding: 5px;
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+    width: calc(100vw - 40px);
+    max-width: calc(600px - 20px);
+    border: none;
+    color: white;
+    border-radius: 5px;
+    background-color: lightblue;
+}
+
+.action-buttons button:active, .action-buttons button:hover {
+    background-color: slategray;
+}
+
+#explanationContainer {
+    margin-top: 20px;
+    padding: 15px 0 60px 0;
+    border-radius: 5px;
+}
+
+#explanation em {
+    font-style: italic;
+    color: #388e3c;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    max-width: 400px;
+    border-radius: 5px;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.modal-content button {
+    margin-top: 10px;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.correct {
+    background-color: #d4edda; /* Grünlich für korrekte Antwort */
+}
+
+.incorrect {
+    background-color: #f8d7da; /* Rötlich für falsche Antwort */
+}
+
+.partial {
+    background-color: #fff3cd; /* Gelblich für teilweise korrekte Antwort */
+}

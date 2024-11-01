@@ -156,7 +156,7 @@ function initializeApp() {
         let methods = [];
         if (isSentence) {
             methods = [
-                `Lasse eine schwierige Vokabel (einzelne oder zusammengesetzte Wörter) in diesem Satz weg: ${word} - Bitte den Nutzer, die Lücke zu füllen und gib als Hinweis die deutsche Übersetzung des in der Lücke fehlenden Wortes. Die Aufgabenstellung darf nicht die Antwort enthalten!`,
+                `Lasse eine schwierige Vokabel (einzelne oder zusammengesetzte Wörter) in diesem Satz weg: ${word} - Ersetze das wort mit '...........' und bitte den Nutzer, die Lücke zu füllen und gib als Hinweis die deutsche Übersetzung des in der Lücke fehlenden Wortes. Die Aufgabenstellung darf nicht die Antwort enthalten!`,
                 `Frage den Nutzer nach der sinngemäßen Übersetzung des Satzes aus dem Deutschen ins Französische: "${word}". Die Aufgabenstellung darf nicht die Antwort '${word}' enthalten!`
             ];
         } else {

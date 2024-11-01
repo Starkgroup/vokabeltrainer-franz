@@ -289,7 +289,7 @@ function initializeApp() {
         emElements.forEach(em => {
             em.style.cursor = 'pointer';
             em.addEventListener('click', () => {
-                const editedVocab = prompt('Vokabel bearbeiten und hinzufügen:', em.textContent);
+                const editedVocab = prompt('Vokabel bearbeiten und hinzufügen:', em.textContent.replace(/['"`]/g, "").trim());
                 if (editedVocab) {
                     vocabList.push({ word: editedVocab.trim(), score: 5 });
                     localStorage.setItem('vocabList', JSON.stringify(vocabList));

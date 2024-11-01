@@ -76,8 +76,7 @@ main {
     padding: 10px;
     font-size: 16px;
     line-height: 1.5;
-    height: auto;
-    max-height: calc(1.5em * 2);
+    height: 5.5em;
     overflow-y: auto;
     resize: none;
     border-radius: 5px;

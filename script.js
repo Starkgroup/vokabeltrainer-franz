@@ -106,7 +106,7 @@ let uiText = {
     welcomeMessage: 'Your turn',
     loadingTask: 'Loading ...',
     yourAnswerPlaceholder: 'Your answer',
-    reviewAnswerButton: 'Is this correkt?',
+    reviewAnswerButton: 'Is this correct?',
     nextTaskButton: 'Next task, please ...',
     addVocabAlt: 'Add Vocabulary',
     skipVocabAlt: 'I don\'t need to train this anymore',

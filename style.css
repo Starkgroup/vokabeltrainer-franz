@@ -96,7 +96,7 @@ main {
     padding: 0 10px;
 }
 
-.action-buttons button {
+.action-buttons button, #modalAddVocab .modal-content button {
     font-size: 24px;
     padding: 5px;
     cursor: pointer;
@@ -109,7 +109,9 @@ main {
 }
 
 .action-buttons button:active,
-.action-buttons button:hover {
+.action-buttons button:hover, 
+#modalAddVocab .modal-content button:hover, 
+#modalAddVocab .modal-content button:active {
     background-color: slategray;
 }
 
@@ -152,6 +154,7 @@ main {
     width: 100%;
     padding: 10px;
     margin-top: 10px;
+    font-size: 1.1em;
 }
 
 .modal-content button {
@@ -173,3 +176,27 @@ main {
     background-color: #fff3cd;
 }
 
+#modalAddVocab .modal-content button {
+    margin-top: 10px;
+    padding: 10px;
+    width: 40%;
+    cursor: pointer;
+}
+
+#modalAddVocab .modal-content button {
+    width: 40%;
+    max-width: 40%;
+    font-size: 0.8em;
+}
+
+#modalAddVocab .modal-content button:first-of-type {
+    margin-right: 4%;
+}
+
+#modalAddVocab .modal-content button:last-of-type {
+    background-color: slategray;
+
+}
+#modalAddVocab .modal-content button:hover {
+    opacity: 0.8;
+}

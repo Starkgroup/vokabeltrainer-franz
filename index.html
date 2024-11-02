@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -21,10 +19,10 @@
         <header>
             <h1>Welcome</h1>
             <div class="buttons">
-                <button class="orange" id="addVocab" alt="Add Vocabulary">✚</button>
-                <button class="green" id="skipVocab" alt="Remove from vocabulary training list">✓</button>
-                <button class="blue" id="restartButton" style="display: none;" alt="Reset the vocabulary training list">⏎</button>
-                <button class="red" id="resetApp" alt="Reset Application">🗑️</button>
+                <button class="orange" id="addVocab" title="Add Vocabulary">✚</button>
+                <button class="green" id="skipVocab" title="Remove from vocabulary training list">✓</button>
+                <button class="blue" id="restartButton" style="display: none;" title="Reset the vocabulary training list">⏎</button>
+                <button class="red" id="resetApp" title="Reset Application">🗑️</button>
             </div>
         </header>
 
@@ -59,7 +57,7 @@
     <div id="modalUserLang" class="modal">
         <div class="modal-content">
             <h2>What is your native language?</h2>
-            <p>Please enter your native language in English:</p>
+            <p>In English, please enter your native language:</p>
             <input type="text" id="userLanguageInput" placeholder="For example: German">
             <button id="saveUserLanguage">Save</button>
         </div>
@@ -68,7 +66,7 @@
     <div id="modalTrainingLang" class="modal">
         <div class="modal-content">
             <h2>Which language do you want to learn?</h2>
-            <p>Please enter the language you want to train in English:</p>
+            <p>In English, please enter the language you want to learn:</p>
             <input type="text" id="trainingLanguageInput" placeholder="For example: French">
             <button id="saveTrainingLanguage">Save</button>
         </div>
@@ -85,8 +83,18 @@
         </div>
     </div>
 
+    <!-- Add Vocabulary Modal -->
+    <div id="modalAddVocab" class="modal">
+        <div class="modal-content">
+            <h2>Add Vocabulary</h2>
+            <p>Please enter the new vocabulary or sentece (sentences always with punctuation):</p>
+            <input type="text" id="addVocabInput" placeholder="Enter vocabulary">
+            <button id="saveAddVocab">Add</button>
+            <button id="cancelAddVocab">Cancel</button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 
 </html>
-

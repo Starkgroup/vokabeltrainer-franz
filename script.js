@@ -1,6 +1,92 @@
-
-
 // script.js
+
+// Add these utility functions at the top of script.js
+
+// Utility function to convert a string to ArrayBuffer
+function strToArrayBuffer(str) {
+    return new TextEncoder().encode(str);
+}
+
+// Utility function to convert ArrayBuffer to Base64
+function arrayBufferToBase64(buffer) {
+    return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+}
+
+// Utility function to convert Base64 to ArrayBuffer
+function base64ToArrayBuffer(base64) {
+    return Uint8Array.from(atob(base64), c => c.charCodeAt(0)).buffer;
+}
+
+// Function to derive a key from a passphrase
+async function deriveKey(passphrase, salt = 'vocab-salt') {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
+        'raw',
+        enc.encode(passphrase),
+        { name: 'PBKDF2' },
+        false,
+        ['deriveKey']
+    );
+    return crypto.subtle.deriveKey(
+        {
+            name: 'PBKDF2',
+            salt: enc.encode(salt),
+            iterations: 100000,
+            hash: 'SHA-256'
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+    );
+}
+
+// Function to encrypt data
+async function encryptData(plainText, passphrase) {
+    const enc = new TextEncoder();
+    const iv = crypto.getRandomValues(new Uint8Array(12)); // Initialization vector
+    const key = await deriveKey(passphrase);
+    const encrypted = await crypto.subtle.encrypt(
+        {
+            name: 'AES-GCM',
+            iv: iv
+        },
+        key,
+        enc.encode(plainText)
+    );
+    // Combine IV and encrypted data
+    const combined = new Uint8Array(iv.length + encrypted.byteLength);
+    combined.set(iv, 0);
+    combined.set(new Uint8Array(encrypted), iv.length);
+    return arrayBufferToBase64(combined.buffer);
+}
+
+// Function to decrypt data
+async function decryptData(cipherText, passphrase) {
+    const combinedBuffer = base64ToArrayBuffer(cipherText);
+    const combined = new Uint8Array(combinedBuffer);
+    const iv = combined.slice(0, 12);
+    const data = combined.slice(12);
+    const key = await deriveKey(passphrase);
+    try {
+        const decrypted = await crypto.subtle.decrypt(
+            {
+                name: 'AES-GCM',
+                iv: iv
+            },
+            key,
+            data
+        );
+        const dec = new TextDecoder();
+        return dec.decode(decrypted);
+    } catch (e) {
+        console.error('Decryption failed:', e);
+        return null;
+    }
+}
+
+// Define a passphrase for encryption (In real-world scenarios, handle this securely)
+const PASSPHRASE = 'your-secure-passphrase'; // Replace with a secure passphrase
 
 let vocabList = [];
 let currentVocab = null;
@@ -20,17 +106,17 @@ let userAnswerElement;
 
 // Text content for UI elements
 let uiText = {
-    welcomeMessage: 'Welcome',
-    loadingTask: 'Loading task...',
+    welcomeMessage: 'Your turn',
+    loadingTask: 'Loading ...',
     yourAnswerPlaceholder: 'Your answer',
-    reviewAnswerButton: 'Review my answer',
-    nextTaskButton: 'Next task, please',
+    reviewAnswerButton: 'Is this correkt?',
+    nextTaskButton: 'Next task, please ...',
     addVocabAlt: 'Add Vocabulary',
-    skipVocabAlt: 'Remove from vocabulary training list',
-    restartButtonAlt: 'Reset the vocabulary training list',
-    resetAppButtonAlt: 'Reset Application',
+    skipVocabAlt: 'I don\'t need to train this anymore',
+    restartButtonAlt: 'Retrain all vocabulary',
+    resetAppButtonAlt: 'Delete all settings and vocabulary',
     resetAppConfirmation: 'Are you sure you want to reset the application? This will delete all vocabulary items and reset all settings.',
-    addVocabPrompt: 'Please enter the new vocabulary or sentence:',
+    addVocabPrompt: 'Please enter the new vocabulary or sentece (sentences always with punctuation):',
     addVocabSuccess: 'Vocabulary added!',
     enterAllVocabPrompt: 'Please enter all three vocabulary items to start.',
     learnedAllVocab: 'You have successfully learned all vocabularies, great job!',
@@ -39,22 +125,22 @@ let uiText = {
         enterApiKeyPrompt: 'Please enter your OpenAI API key:',
         saveButton: 'Save',
         userLangTitle: 'What is your native language?',
-        userLangPrompt: 'Please enter your native language in English:',
+        userLangPrompt: 'In English, please enter your native language:',
         userLangPlaceholder: 'For example: German',
         trainingLangTitle: 'Which language do you want to learn?',
-        trainingLangPrompt: 'Please enter the language you want to train in English:',
+        trainingLangPrompt: 'In English, please enter the language you want to learn:',
         trainingLangPlaceholder: 'For example: French',
         addFirstVocabTitle: 'Add Your First Vocabularies',
-        addFirstVocabPrompt: 'Please enter your first three vocabulary items in the language you are learning:',
+        addFirstVocabPrompt: 'Please enter your first three vocabulary items in the language you are learning. You can also add a sentence with punctuation (. / ! / ?) in the end.',
         addVocabPlaceholder: 'Enter vocabulary'
     }
 };
 
 // Function to translate UI text
 async function translateUIText(targetLanguage) {
-    const apiKey = localStorage.getItem('apiKey');
+    const apiKey = await getApiKey();
     if (!apiKey) {
-        console.error('API Key is missing. Please enter your OpenAI API key.');
+        console.error('API Key is missing or invalid.');
         return;
     }
 
@@ -112,10 +198,10 @@ function updateUIElements() {
     userAnswerElement.placeholder = uiText.yourAnswerPlaceholder;
     submitButton.textContent = uiText.reviewAnswerButton;
     nextButton.textContent = uiText.nextTaskButton;
-    document.getElementById('addVocab').alt = uiText.addVocabAlt;
-    document.getElementById('skipVocab').alt = uiText.skipVocabAlt;
-    restartButton.alt = uiText.restartButtonAlt;
-    resetAppButton.alt = uiText.resetAppButtonAlt;
+    document.getElementById('addVocab').title = uiText.addVocabAlt;
+    document.getElementById('skipVocab').title = uiText.skipVocabAlt;
+    restartButton.title = uiText.restartButtonAlt;
+    resetAppButton.title = uiText.resetAppButtonAlt;
 
     // Update modals
     // API Key Modal
@@ -146,6 +232,14 @@ function updateUIElements() {
     modalFirstVocab.querySelector('#firstVocabInput2').placeholder = uiText.modal.addVocabPlaceholder;
     modalFirstVocab.querySelector('#firstVocabInput3').placeholder = uiText.modal.addVocabPlaceholder;
     modalFirstVocab.querySelector('#saveFirstVocab').textContent = uiText.modal.saveButton;
+
+    // Add Vocabulary Modal
+    const modalAddVocab = document.getElementById('modalAddVocab');
+    modalAddVocab.querySelector('h2').textContent = 'Add Vocabulary';
+    modalAddVocab.querySelector('p').textContent = uiText.addVocabPrompt;
+    document.getElementById('addVocabInput').placeholder = uiText.modal.addVocabPlaceholder;
+    document.getElementById('saveAddVocab').textContent = uiText.modal.saveButton;
+    document.getElementById('cancelAddVocab').textContent = 'Cancel'; // You can add this to uiText if needed
 }
 
 // Function to show the API key modal
@@ -159,9 +253,10 @@ function requestApiKey() {
     document.getElementById('saveApiKey').addEventListener('click', async () => {
         const key = document.getElementById('apiKeyInput').value.trim();
         if (key) {
-            localStorage.setItem('apiKey', key);
+            const encryptedKey = await encryptData(key, PASSPHRASE);
+            localStorage.setItem('apiKey', encryptedKey);
             modalKey.style.display = 'none';
-            requestUserLanguage();
+            requestTrainingLanguage();
         }
     });
 }
@@ -178,6 +273,7 @@ function requestUserLanguage() {
         const language = document.getElementById('userLanguageInput').value.trim();
         if (language) {
             localStorage.setItem('userLanguage', language);
+
             modalUserLang.style.display = 'none';
 
             // Check if the translated UI text is already in localStorage
@@ -192,7 +288,7 @@ function requestUserLanguage() {
             // Note: Do NOT call updateUIElements here
             // It will be called inside initializeApp after DOM elements are set
 
-            requestTrainingLanguage();
+            initializeApp();
         }
     });
 }
@@ -210,7 +306,7 @@ function requestTrainingLanguage() {
         if (language) {
             localStorage.setItem('trainingLanguage', language);
             modalTrainingLang.style.display = 'none';
-            initializeApp();
+            requestUserLanguage();
         }
     });
 }
@@ -222,10 +318,10 @@ const storedTrainingLanguage = localStorage.getItem('trainingLanguage');
 
 if (!storedApiKey) {
     requestApiKey();
-} else if (!storedUserLanguage) {
-    requestUserLanguage();
 } else if (!storedTrainingLanguage) {
     requestTrainingLanguage();
+} else if (!storedUserLanguage) {
+    requestUserLanguage();
 } else {
     initializeApp();
 }
@@ -273,6 +369,20 @@ async function initializeApp() {
         setupEventListeners();
         loadNextQuestion();
     }
+}
+
+async function getApiKey() {
+    const encryptedKey = localStorage.getItem('apiKey');
+    if (!encryptedKey) {
+        console.error('API Key is missing. Please enter your OpenAI API key.');
+        return null;
+    }
+    const decryptedKey = await decryptData(encryptedKey, PASSPHRASE);
+    if (!decryptedKey) {
+        console.error('Failed to decrypt the API Key.');
+        return null;
+    }
+    return decryptedKey;
 }
 
 function loadVocabList() {
@@ -403,18 +513,18 @@ async function generateTask(word) {
     if (isSentence) {
         methods = [
             `Leave out a difficult vocabulary word (single or compound words) in this sentence: ${word} - Replace the word with '...........' and ask the user in ${userLanguage} to fill in the blank, providing as a hint the ${userLanguage} translation of the missing word. The task should not contain the answer!`,
-            `Ask the user in ${userLanguage} for the approximate translation of the sentence from ${trainingLanguage} into ${userLanguage}: "${word}". The task should not contain the answer '${word}'!`
+            `Ask the user in ${userLanguage} for the approximate translation of the sentence from ${trainingLanguage} into ${userLanguage}: '${word}'. The task should not contain the answer '${word}', because that is what the user wants to train!`
         ];
     } else {
         methods = [
-            `The user wants to practice the ${trainingLanguage} vocabulary '${word}'. Create a ${userLanguage} sentence with the translation and formulate in ${userLanguage} a request for the user to translate this sentence into ${trainingLanguage}. The task should not contain the vocabulary '${word}'!`,
-            `Formulate in ${userLanguage} a request for the user to translate '${word}' from ${trainingLanguage} into ${userLanguage}. The task must contain the word '${word}' (if the word is a noun, use it with the correct ${trainingLanguage} article)!`,
-            `Formulate in ${userLanguage} a request for the user to translate the approximate meaning of the ${trainingLanguage} vocabulary '${word}' from ${userLanguage} into ${trainingLanguage}. The task should not contain the answer '${word}'. The task must contain the ${userLanguage} translation as a word!`
+            `The user wants to practice the ${trainingLanguage} vocabulary '${word}'. Create a ${userLanguage} sentence with the translation and formulate in ${userLanguage} a request for the user to translate this sentence into ${trainingLanguage}. Your request should not contain the vocabulary '${word}', because that is what the user wants to train!`,
+            `Formulate in ${userLanguage} a request for the user to translate '${word}' from ${trainingLanguage} into ${userLanguage}. The request must contain the word '${word}' (if the word is a noun, use it with the correct ${trainingLanguage} article)!`,
+            `Formulate in ${userLanguage} a request for the user to translate the approximate meaning of the ${trainingLanguage} vocabulary '${word}' from ${userLanguage} into ${trainingLanguage}. The request should not contain the answer '${word}', because that is what the user wants to train. The request must contain the ${userLanguage} translation as a word!`
         ];
     }
     const method = methods[Math.floor(Math.random() * methods.length)];
 
-    const systemPrompt = `The assistant is a helpful and friendly supporter in learning ${trainingLanguage} vocabulary and sentences. The assistant always pays attention to correct ${trainingLanguage} articles and other details in grammar, sentence structure, and spelling when evaluating answers. The assistant avoids unnecessary phrases like "thank you very much".`;
+    const systemPrompt = `The assistant is an encouraging, helpful and friendly supporter in learning ${trainingLanguage} vocabulary and sentences. When evaluating answers, the assistant always pays attention to the correct usage of the ${trainingLanguage} language, like grammar, sentence structure and spelling. The assistant avoids unnecessary phrases like "thank you very much".`;
 
     let response = await callChatGPTAPI(systemPrompt, method);
 
@@ -431,6 +541,8 @@ async function submitAnswer() {
     isAwaitingAnswer = false;
     submitButton.style.display = 'none';
     nextButton.style.display = 'inline-block';
+    explanationContainer.style.display = 'none';
+    userAnswerElement.value = '';
 
     const userLanguage = localStorage.getItem('userLanguage');
     const trainingLanguage = localStorage.getItem('trainingLanguage');
@@ -499,12 +611,34 @@ function skipVocab() {
 }
 
 function addVocab() {
-    const newVocab = prompt(uiText.addVocabPrompt);
-    if (newVocab) {
-        vocabList.push({ word: newVocab.trim(), score: 5 });
-        localStorage.setItem('vocabList', JSON.stringify(vocabList));
-        alert(uiText.addVocabSuccess);
-    }
+    const modalAddVocab = document.getElementById('modalAddVocab');
+    modalAddVocab.style.display = 'block';
+
+    // Clear previous input
+    document.getElementById('addVocabInput').value = '';
+
+    // Remove existing event listeners to prevent duplicates
+    const saveAddVocabButton = document.getElementById('saveAddVocab');
+    const cancelAddVocabButton = document.getElementById('cancelAddVocab');
+
+    saveAddVocabButton.replaceWith(saveAddVocabButton.cloneNode(true));
+    cancelAddVocabButton.replaceWith(cancelAddVocabButton.cloneNode(true));
+
+    document.getElementById('saveAddVocab').addEventListener('click', () => {
+        const newVocab = document.getElementById('addVocabInput').value.trim();
+        if (newVocab) {
+            vocabList.push({ word: newVocab, score: 5 });
+            localStorage.setItem('vocabList', JSON.stringify(vocabList));
+            modalAddVocab.style.display = 'none';
+            alert(uiText.addVocabSuccess);
+        } else {
+            alert('Please enter a valid vocabulary item.');
+        }
+    });
+
+    document.getElementById('cancelAddVocab').addEventListener('click', () => {
+        modalAddVocab.style.display = 'none';
+    });
 }
 
 function resetApp() {
@@ -516,9 +650,9 @@ function resetApp() {
 }
 
 async function callChatGPTAPI(systemPrompt, userPrompt) {
-    const apiKey = localStorage.getItem('apiKey');
+    const apiKey = await getApiKey();
     if (!apiKey) {
-        console.error('API Key is missing.');
+        console.error('API Key is missing or invalid.');
         return '';
     }
 
@@ -577,13 +711,35 @@ function enableVocabClick() {
     emElements.forEach(em => {
         em.style.cursor = 'pointer';
         em.addEventListener('click', () => {
-            const editedVocab = prompt(uiText.addVocabPrompt, em.textContent.replace(/['"`]/g, "").trim());
-            if (editedVocab) {
-                vocabList.push({ word: editedVocab.trim(), score: 5 });
-                localStorage.setItem('vocabList', JSON.stringify(vocabList));
-                alert(uiText.addVocabSuccess);
-            }
+            const modalAddVocab = document.getElementById('modalAddVocab');
+            modalAddVocab.style.display = 'block';
+
+            // Pre-fill the input with the clicked word
+            const existingWord = em.textContent.replace(/['"`]/g, "").trim();
+            document.getElementById('addVocabInput').value = existingWord;
+
+            // Remove existing event listeners to prevent duplicates
+            const saveAddVocabButton = document.getElementById('saveAddVocab');
+            const cancelAddVocabButton = document.getElementById('cancelAddVocab');
+
+            saveAddVocabButton.replaceWith(saveAddVocabButton.cloneNode(true));
+            cancelAddVocabButton.replaceWith(cancelAddVocabButton.cloneNode(true));
+
+            document.getElementById('saveAddVocab').addEventListener('click', () => {
+                const editedVocab = document.getElementById('addVocabInput').value.trim();
+                if (editedVocab) {
+                    vocabList.push({ word: editedVocab, score: 5 });
+                    localStorage.setItem('vocabList', JSON.stringify(vocabList));
+                    modalAddVocab.style.display = 'none';
+                    alert(uiText.addVocabSuccess);
+                } else {
+                    alert('Please enter a valid vocabulary item.');
+                }
+            });
+
+            document.getElementById('cancelAddVocab').addEventListener('click', () => {
+                modalAddVocab.style.display = 'none';
+            });
         });
     });
 }
-

@@ -21,7 +21,8 @@
             <div class="buttons">
                 <button class="orange" id="addVocab" title="Add Vocabulary">✚</button>
                 <button class="green" id="skipVocab" title="Remove from vocabulary training list">✓</button>
-                <button class="blue" id="restartButton" style="display: none;" title="Reset the vocabulary training list">⏎</button>
+                <button class="blue" id="restartButton" style="display: none;"
+                    title="Reset the vocabulary training list">⏎</button>
                 <button class="gray" id="resetApp" title="Reset Application">⌫</button>
             </div>
         </header>
@@ -48,7 +49,9 @@
     <div id="modalKey" class="modal">
         <div class="modal-content">
             <h2>API Key Required</h2>
-            <p>Please enter your OpenAI API key. YYou can create one in <a href="https://platform.openai.com/api-keys" target="_blank">your OpenAI Playground</a>>.</p>
+            <p>Please enter your OpenAI API key. </p>
+            <p class="comment">This is needed to create the AI connection. You can create one in <a href="https://platform.openai.com/api-keys"
+                        target="_blank">your OpenAI Playground</a>. The tool uses the OpenAI chat model gpt-4o-mini. Based on your usage, OpenAI will charge your account through the API key. At no point in time the developer of this application will know your API key (you can check the <a href="https://github.com/Starkgroup/vokabeltrainer-franz" target="_blank">full source code on GitHub</a>).</p>
             <input type="password" id="apiKeyInput" placeholder="API Key">
             <button id="saveApiKey">Save</button>
         </div>
@@ -79,7 +82,8 @@
             <input type="text" id="firstVocabInput1" placeholder="Enter vocabulary">
             <input type="text" id="firstVocabInput2" placeholder="Enter vocabulary">
             <input type="text" id="firstVocabInput3" placeholder="Enter vocabulary">
-            <button id="saveFirstVocab">Save</button>
+            <p class="comment" id="vocabularyNote">Please note: This is an experimental tool. There is no login - all information will be stored on this device. By deleting the cache, your progress will also be lost.</p>
+    <button id="saveFirstVocab">Save</button>
         </div>
     </div>
 
@@ -89,8 +93,10 @@
             <h2>Add Vocabulary</h2>
             <p>Please enter the new vocabulary or sentece (sentences always with punctuation):</p>
             <input type="text" id="addVocabInput" placeholder="Enter vocabulary">
-            <button id="saveAddVocab">Add</button>
-            <button id="cancelAddVocab">Cancel</button>
+            <div class="buttonContainer">
+                <button id="saveAddVocab">Add</button>
+                <button id="cancelAddVocab">Cancel</button>
+            </div>
         </div>
     </div>
 

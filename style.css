@@ -15,6 +15,15 @@ body {
     box-sizing: border-box;
 }
 
+a, a:visited, a:active, a:hover {
+    color: darkcyan;
+    text-decoration: none;
+}
+
+a:hover, a:active {
+    text-decoration: underline;
+}
+
 .container {
     max-width: 600px;
     padding: 20px;
@@ -30,6 +39,11 @@ header {
 header h1 {
     margin: 0;
     font-size: 1.5em;
+}
+
+h2 {
+    font-weight: 400;
+    line-height: 1.4em;
 }
 
 img.logo {
@@ -65,11 +79,11 @@ img.logo {
 }
 
 .buttons button.blue {
-    background-color: darkblue;
+    background-color: darkcyan;
 }
 
 .buttons button.orange {
-    background-color: darkorange;
+    background-color: darkcyan;
 }
 
 main {
@@ -102,20 +116,20 @@ main {
     width: 100%;
     display: flex;
     justify-content: center;
-    z-index: 1000;
+    z-index: 99;
     padding: 0 10px;
 }
 
-.action-buttons button, #modalAddVocab .modal-content button {
+button {
     font-size: 24px;
     padding: 5px;
     cursor: pointer;
     border: none;
-    background-color: lightblue;
+    background-color: darkcyan;
     width: calc(100vw - 40px);
     max-width: calc(600px - 20px);
     color: white;
-    border-radius: 5px;
+    border-radius: 10px;
 }
 
 .action-buttons button:active,
@@ -134,6 +148,7 @@ main {
 #explanation em {
     font-style: italic;
     color: #388e3c;
+    font-weight: 600;
 }
 
 .modal {
@@ -164,6 +179,7 @@ main {
     width: 100%;
     padding: 10px;
     margin-top: 10px;
+    margin-bottom: 10px;
     font-size: 1.1em;
 }
 
@@ -194,19 +210,34 @@ main {
 }
 
 #modalAddVocab .modal-content button {
-    width: 40%;
-    max-width: 40%;
+    width: 45%;
+    max-width: 45%;
     font-size: 0.8em;
 }
 
 #modalAddVocab .modal-content button:first-of-type {
-    margin-right: 4%;
+    margin-right: auto;
 }
 
 #modalAddVocab .modal-content button:last-of-type {
     background-color: slategray;
+    margin-left: auto;
+    margin-right: 0;
 
 }
 #modalAddVocab .modal-content button:hover {
     opacity: 0.8;
 }
+div.buttonContainer {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comment {
+    color: slategray;
+    font-size: 0.8em;
+}
+
+

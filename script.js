@@ -1,7 +1,5 @@
 // script.js
 
-// Add these utility functions at the top of script.js
-
 // Utility function to convert a string to ArrayBuffer
 function strToArrayBuffer(str) {
     return new TextEncoder().encode(str);
@@ -85,9 +83,8 @@ async function decryptData(cipherText, passphrase) {
     }
 }
 
-// Define a passphrase for encryption (In real-world scenarios, handle this securely)
-const PASSPHRASE = 'your-secure-passphrase'; // Replace with a secure passphrase
-
+// Define a passphrase for encryption
+const PASSPHRASE = 'I know this method is not secure at all - but you know this is experimental an so ... screw it';
 let vocabList = [];
 let currentVocab = null;
 let currentTask = '';
@@ -115,8 +112,8 @@ let uiText = {
     skipVocabAlt: 'I don\'t need to train this anymore',
     restartButtonAlt: 'Retrain all vocabulary',
     resetAppButtonAlt: 'Delete all settings and vocabulary',
-    resetAppConfirmation: 'Are you sure you want to reset the application? This will delete all vocabulary items and reset all settings.',
-    addVocabPrompt: 'Please enter the new vocabulary or sentece (sentences always with punctuation):',
+    resetAppConfirmation: 'Are you sure you want to reset the application? This will delete all vocabulary items and reset all settings. Your progress will be lost.',
+    addVocabPrompt: 'Please enter the new vocabulary or sentece (sentences always with punctuation, like . / ! / ?):',
     addVocabSuccess: 'Vocabulary added!',
     enterAllVocabPrompt: 'Please enter all three vocabulary items to start.',
     learnedAllVocab: 'You have successfully learned all vocabularies, great job!',
@@ -130,9 +127,10 @@ let uiText = {
         trainingLangTitle: 'Which language do you want to learn?',
         trainingLangPrompt: 'In English, please enter the language you want to learn:',
         trainingLangPlaceholder: 'For example: French',
-        addFirstVocabTitle: 'Add Your First Vocabularies',
-        addFirstVocabPrompt: 'Please enter your first three vocabulary items in the language you are learning. You can also add a sentence with punctuation (. / ! / ?) in the end.',
-        addVocabPlaceholder: 'Enter vocabulary'
+        addFirstVocabTitle: 'First Vocabularies',
+        addFirstVocabPrompt: 'Enter your vocabulary items in the language you are learning. You can also add full sentences (with punctuation like . / ! / ? in the end).',
+        addVocabPlaceholder: 'Enter vocabulary',
+        vocabularyNote: 'Please note: This is an experimental tool. There is no login - all information will be stored on this device. By deleting the cache, your progress will also be lost.'
     }
 };
 
@@ -146,7 +144,7 @@ async function translateUIText(targetLanguage) {
 
     const textToTranslate = JSON.stringify(uiText);
 
-    const systemPrompt = 'You are a helpful assistant that translates JSON objects containing UI text into the target language while preserving the JSON structure.';
+    const systemPrompt = 'You are a helpful assistant that translates JSON objects containing UI text into the target language while preserving the JSON structure. Use informal language (for example in German: "Du")';
     const userPrompt = `Translate the following JSON object into ${targetLanguage}. Preserve the JSON structure and keys. Do not translate any keys, only the values.
 
 JSON to translate:
@@ -231,6 +229,7 @@ function updateUIElements() {
     modalFirstVocab.querySelector('#firstVocabInput2').placeholder = uiText.modal.addVocabPlaceholder;
     modalFirstVocab.querySelector('#firstVocabInput3').placeholder = uiText.modal.addVocabPlaceholder;
     modalFirstVocab.querySelector('#saveFirstVocab').textContent = uiText.modal.saveButton;
+    modalFirstVocab.querySelector('#vocabularyNote').textContent = uiText.modal.vocabularyNote;
 
     // Add Vocabulary Modal
     const modalAddVocab = document.getElementById('modalAddVocab');

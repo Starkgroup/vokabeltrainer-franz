@@ -241,6 +241,30 @@ function updateUIElements() {
     document.getElementById('cancelAddVocab').textContent = 'Cancel'; // You can add this to uiText if needed
 }
 
+async function validateApiKey(apiKey) {
+    try {
+        const response = await fetch('https://api.openai.com/v1/models', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            return true; 
+        } else {
+            const errorData = await response.json();
+            console.error('API Key validation failed:', errorData);
+            return false;
+        }
+    } catch (error) {
+        console.error('Error validating API Key:', error);
+        return false;
+    }
+}
+
+
 // Function to show the API key modal
 function infoWindowFirst() {
     const modalKey = document.getElementById('modalInfo');
@@ -268,20 +292,44 @@ function infoWindowLater() {
 }
 
 // Function to show the API key modal
-function requestApiKey() {
+async function requestApiKey() {
     const modalKey = document.getElementById('modalKey');
     modalKey.style.display = 'block';
     const saveApiKeyButton = modalKey.querySelector('#saveApiKey');
 
-    // Remove existing event listeners to prevent duplicates
+    // Entferne vorhandene Event-Listener, um Duplikate zu vermeiden
     saveApiKeyButton.replaceWith(saveApiKeyButton.cloneNode(true));
     document.getElementById('saveApiKey').addEventListener('click', async () => {
         const key = document.getElementById('apiKeyInput').value.trim();
         if (key) {
-            const encryptedKey = await encryptData(key, PASSPHRASE);
-            localStorage.setItem('apiKey', encryptedKey);
-            modalKey.style.display = 'none';
-            requestTrainingLanguage();
+            // Zeige einen Ladeindikator oder deaktiviere den Button, um doppelte Klicks zu verhindern
+            saveApiKeyButton.disabled = true;
+            saveApiKeyButton.textContent = 'Validating...';
+
+            const isValid = await validateApiKey(key);
+            if (isValid) {
+                try {
+                    const encryptedKey = await encryptData(key, PASSPHRASE);
+                    localStorage.setItem('apiKey', encryptedKey);
+                    modalKey.style.display = 'none';
+                    // Setze den Button-Text zurück
+                    saveApiKeyButton.textContent = 'Save';
+                    saveApiKeyButton.disabled = false;
+                    requestUserLanguage();
+                } catch (encryptionError) {
+                    console.error('Encryption failed:', encryptionError);
+                    alert('An error occurred while encrypting the API key. Please try again.');
+                    saveApiKeyButton.textContent = 'Save';
+                    saveApiKeyButton.disabled = false;
+                }
+            } else {
+                alert('The API key you entered is invalid. Please check your OpenAI credit balance and the key itself.');
+                // Setze den Button-Text zurück
+                saveApiKeyButton.textContent = 'Save';
+                saveApiKeyButton.disabled = false;
+            }
+        } else {
+            alert('Please enter an API key.');
         }
     });
 }

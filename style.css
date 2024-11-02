@@ -240,4 +240,6 @@ div.buttonContainer {
     font-size: 0.8em;
 }
 
-
+#version {
+    text-align: center;
+}

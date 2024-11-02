@@ -1,5 +1,7 @@
 // script.js
 
+const version = 'Version 0.1a'
+
 // Utility function to convert a string to ArrayBuffer
 function strToArrayBuffer(str) {
     return new TextEncoder().encode(str);
@@ -113,7 +115,7 @@ let uiText = {
     skipVocabAlt: 'I don\'t need to train this anymore',
     restartButtonAlt: 'Retrain all vocabulary',
     resetAppButtonAlt: 'Delete all settings and vocabulary',
-    resetAppConfirmation: 'Are you sure you want to reset the api key?',
+    resetAppConfirmation: 'Are you sure you want to reset all app data? This will delete your vocabulary and progress too.',
     addVocabPrompt: 'Please enter the new vocabulary or sentece (sentences always with punctuation, like . / ! / ?):',
     addVocabSuccess: 'Vocabulary added!',
     enterAllVocabPrompt: 'Please enter all three vocabulary items to start.',
@@ -291,6 +293,7 @@ function infoWindowLater() {
     const modalKey = document.getElementById('modalInfo');
     modalKey.style.display = 'block';
     const infoRead = modalKey.querySelector('#infoRead');
+    document.getElementById('version').textContent = version; // You can add this to uiText if needed
 
     // Remove existing event listeners to prevent duplicates
     infoRead.replaceWith(infoRead.cloneNode(true));
@@ -739,11 +742,8 @@ function addVocab() {
 function resetApp() {
     const confirmation = confirm(uiText.resetAppConfirmation);
     if (confirmation) {
-        //localStorage.clear();
-
-        function deleteApiKey() {
-            localStorage.removeItem('apiKey');
-        }
+        // localStorage.clear();
+        localStorage.removeItem('apiKey');
 
         location.reload();
     }

@@ -2,22 +2,73 @@
 
 let vocabList = [];
 
-const apiKey = localStorage.getItem('apiKey');
-if (!apiKey) {
-    document.getElementById('modal').style.display = 'block';
+// scripts.js
+
+// Function to show the API key modal
+function requestApiKey() {
+    document.getElementById('modalKey').style.display = 'block';
     document.getElementById('saveApiKey').addEventListener('click', () => {
-        const key = document.getElementById('apiKeyInput').value;
+        const key = document.getElementById('apiKeyInput').value.trim();
         if (key) {
             localStorage.setItem('apiKey', key);
-            document.getElementById('modal').style.display = 'none';
-            initializeApp();
+            document.getElementById('modalKey').style.display = 'none';
+            requestUserLanguage(); // Proceed to the next modal
         }
     });
+}
+
+// Function to show the user language modal
+function requestUserLanguage() {
+    document.getElementById('modalUserLang').style.display = 'block';
+    document.getElementById('saveUserLanguage').addEventListener('click', () => {
+        const language = document.getElementById('userLanguageInput').value.trim();
+        if (language) {
+            localStorage.setItem('userLanguage', language);
+            document.getElementById('modalUserLang').style.display = 'none';
+            requestTrainingLanguage(); // Proceed to the next modal
+        }
+    });
+}
+
+// Function to show the training language modal
+function requestTrainingLanguage() {
+    document.getElementById('modalTrainingLang').style.display = 'block';
+    document.getElementById('saveTrainingLanguage').addEventListener('click', () => {
+        const language = document.getElementById('trainingLanguageInput').value.trim();
+        if (language) {
+            localStorage.setItem('trainingLanguage', language);
+            document.getElementById('modalTrainingLang').style.display = 'none';
+            initializeApp(); // Proceed to initialize the app
+        }
+    });
+}
+
+// Check if all necessary data is available
+const apiKey = localStorage.getItem('apiKey');
+const userLanguage = localStorage.getItem('userLanguage');
+const trainingLanguage = localStorage.getItem('trainingLanguage');
+
+if (!apiKey) {
+    requestApiKey();
+} else if (!userLanguage) {
+    requestUserLanguage();
+} else if (!trainingLanguage) {
+    requestTrainingLanguage();
 } else {
     initializeApp();
 }
 
 function initializeApp() {
+    // Retrieve languages from localStorage
+    const userLanguage = localStorage.getItem('userLanguage');
+    const trainingLanguage = localStorage.getItem('trainingLanguage');
+
+    // Ensure languages are available
+    if (!userLanguage || !trainingLanguage) {
+        console.error('Languages not set.');
+        return;
+    }
+    
     // Initiales Laden der Vokabeln
     const storedVocabList = localStorage.getItem('vocabList');
     if (storedVocabList) {
@@ -156,51 +207,57 @@ function initializeApp() {
         let methods = [];
         if (isSentence) {
             methods = [
-                `Lasse eine schwierige Vokabel (einzelne oder zusammengesetzte Wörter) in diesem Satz weg: ${word} - Ersetze das wort mit '...........' und bitte auf Deutsch den Nutzer, die Lücke zu füllen und gib als Hinweis die deutsche Übersetzung des in der Lücke fehlenden Wortes. Die Aufgabenstellung darf nicht die Antwort enthalten!`,
-                `Frage den Nutzer auf Deutsch nach der sinngemäßen Übersetzung des Satzes aus dem Deutschen ins Französische: "${word}". Die Aufgabenstellung darf nicht die Antwort '${word}' enthalten!`
+                `Leave out a difficult vocabulary word (single or compound words) in this sentence: ${word} - Replace the word with '...........' and ask the user in ${userLanguage} to fill in the blank, providing as a hint the ${userLanguage} translation of the missing word. The task should not contain the answer!`,
+                `Ask the user in ${userLanguage} for the approximate translation of the sentence from ${userLanguage} into ${trainingLanguage}: "${word}". The task should not contain the answer '${word}'!`
             ];
         } else {
             methods = [
-                `Der Nutzer möchte die französische Vokabel '${word}' üben. Bilde einen deutschen Satz mit der Übersetzung und formuliere auf Deutsch eine Bitte an den Nutzer, diesen Satz ins Französische zu übersetzen. Die Aufgabenstellung darf nicht die Vokabel '${word}' enthalten!`,
-                `Formuliere auf Deutsch eine Bitte an den Nutzer, ${word} aus dem Französischen ins Deutsche zu übersetzen. Die Aufgabenstellung muss das Wort '${word}' enthalten (ist das Wort ein Nomen, verwende es mit korrektem französischem Artikel)!`,
-                `Formuliere auf Deutsch eine Bitte an den Nutzer, die sinngemäße Übersetzung der französischen Vokabel '${word}' aus dem Deutschen ins Französische zu übersetzen. Die Aufgabenstellung darf nicht die Antwort '${word}' enthalten. Die Aufgabenstellung muss die deutsche Übersetzung als Wort enthalten!`
+                `The user wants to practice the ${trainingLanguage} vocabulary '${word}'. Create a ${userLanguage} sentence with the translation and formulate in ${userLanguage} a request for the user to translate this sentence into ${trainingLanguage}. The task should not contain the vocabulary '${word}'!`,
+                `Formulate in ${userLanguage} a request for the user to translate ${word} from ${trainingLanguage} into ${userLanguage}. The task must contain the word '${word}' (if the word is a noun, use it with the correct ${trainingLanguage} article)!`,
+                `Formulate in ${userLanguage} a request for the user to translate the approximate meaning of the ${trainingLanguage} vocabulary '${word}' from ${userLanguage} into ${trainingLanguage}. The task should not contain the answer '${word}'. The task must contain the ${userLanguage} translation as a word!`
             ];
         }
         const method = methods[Math.floor(Math.random() * methods.length)];
-
-        const systemPrompt = `Das GPT ist ein hilfreicher und freundlicher Unterstützer beim Erlernen französischer Vokabeln und Sätze. Das GPT achtet bei der Auswertung von Antworten immer auf korrekte französische Artikel sowie weitere Details bei Grammatik, Satzbau und Rechtschreibung. Das GPT spart sich unnötige Floskeln wie "vielen Dank"`;
-
+    
+        const systemPrompt = `The GPT is a helpful and friendly assistant in learning ${trainingLanguage} vocabulary and sentences. GPT always pays attention to correct ${trainingLanguage} articles and other details in grammar, sentence structure, and spelling when evaluating answers. GPT avoids unnecessary phrases like "thank you very much".`;
+    
         let response = await callChatGPTAPI(systemPrompt, method);
-
+    
         response = markdownToHTML(response);
-
+    
         return response;
     }
-
+    
     async function submitAnswer() {
         if (!isAwaitingAnswer) return;
         const userAnswer = userAnswerElement.value.trim();
         if (!userAnswer) return;
-
+    
         isAwaitingAnswer = false;
         submitButton.style.display = 'none';
         nextButton.style.display = 'inline-block';
-
-        const systemPrompt = `Das GPT ist ein hilfreicher und freundlicher Unterstützer beim Erlernen französischer Vokabeln und Sätze. Das GPT achtet bei der Auswertung von Antworten immer auf korrekte französische Artikel sowie weitere Details bei Grammatik, Satzbau und Rechtschreibung. Aufgaben werden immer auf Deutsch formuliert.`;
-
-        const checkPrompt = `Überprüfe die folgende Antwort des Nutzers auf die gegebene Aufgabe und gib ein JSON zurück mit '"correct": true / false / null' und einer Auswertung für den Nutzer im Feld "explanation" mit Text im Markdown-Format. Ist die Antwort korrekt, kann die Auswertung kurz und einfach erfolgen, aber auch zusätzliche Verwendungen, Informationen zur Herkunft oder Deklinationen des Wortes enthalten. Ist die Antwort falsch, erkläre dem Nutzer informell (per "du"), wie der Nutzer künftig diese Fehler vermeiden kann, weise auf korrekte Schreibweisen, leicht zu verwechselnde Wörter oder grammatikalische Zusammenhänge hin falls nötig. In der Auswertung werden alle französischen Vokabeln oder französischen Sätze schräggestellt. Bei kleinen Rechtschreibfehlern (fehlender Buchstabe oder fehlender accent zum Beispiel) kann "correct": null zurückgegeben werden, aber die Auswerung soll darauf hinweisen.\n\nVokabel: ${currentVocab.word}\n\nAufgabe: ${currentTask}\n\nAntwort des Nutzers: ${userAnswer} - weiß der Nutzer die Antwort nicht, gib ihm eine ausführliche Hilfestellung. Werte Fehler für den Nutzer detailliert und freundlich aus, gib eine Hilfestellung beim herleiten der fehlerhaften Wörter oder Sätze aus dem Deutschen ins Französische. Antwortet der Nutzer sinngemäß richtig, aber nicht genau mit ${currentVocab.word}, ist dies als korrekt auszuwerten. Weise abschließend auf Synonyme, Antonyme oder artverwandte Wörter hin.`;
-
+    
+        const systemPrompt = `The GPT is a helpful and friendly assistant in helping the user learning ${trainingLanguage} vocabulary and sentences. GPT always pays attention to correct ${trainingLanguage} articles and other details in grammar, sentence structure, and spelling when evaluating answers. The user's native language is ${userLanguage}, so tasks are always formulated in ${userLanguage}.`;
+    
+        const checkPrompt = `Check the following user answer to the given task and return a JSON with '"correct": true / false / null' and an evaluation for the user in the field "explanation" with text in Markdown format. If the answer is correct, the evaluation can be short and simple but may also include additional usages, information about the origin, or declensions of the word. If the answer is incorrect, explain to the user informally (using "you") how to avoid these mistakes in the future, pointing out correct spellings, easily confusable words, or grammatical connections if necessary. In the evaluation, all ${trainingLanguage} vocabulary or ${trainingLanguage} sentences should be italicized. For small spelling errors (missing letters or missing accents, for example), "correct": null can be returned, but the evaluation should point this out.
+    
+    Vocabulary: ${currentVocab.word}
+    
+    Task: ${currentTask}
+    
+    User's answer: ${userAnswer} - if the user doesn't know the answer, provide detailed assistance. Evaluate errors for the user in a detailed and friendly manner, offering help in deriving the incorrect words or sentences from ${userLanguage} into ${trainingLanguage}. If the user responds approximately correctly but not exactly with ${currentVocab.word}, this should be considered correct. Finally, point out synonyms, antonyms, or related words.`;
+    
         const response = await callChatGPTAPI(systemPrompt, checkPrompt);
-
+    
         try {
             const result = JSON.parse(response);
             explanationContainer.style.display = 'block';
             explanationElement.innerHTML = markdownToHTML(result.explanation);
             adjustScore(result.correct);
             enableVocabClick();
-
+    
             userAnswerElement.classList.remove('correct', 'incorrect', 'partial');
-
+    
             if (result.correct === true) {
                 userAnswerElement.classList.add('correct');
             } else if (result.correct === false) {
@@ -208,13 +265,14 @@ function initializeApp() {
             } else if (result.correct === null) {
                 userAnswerElement.classList.add('partial');
             }
-
+    
         } catch (e) {
-            console.log(response)
+            console.log(response);
             explanationContainer.style.display = 'block';
-            explanationElement.textContent = 'Fehler bei der Verarbeitung der Antwort.';
+            explanationElement.textContent = 'Error processing the answer.';
         }
     }
+    
 
     function adjustScore(correct) {
         const vocabIndex = vocabList.findIndex(v => v.word === currentVocab.word);

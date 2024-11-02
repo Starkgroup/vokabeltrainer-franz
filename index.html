@@ -47,14 +47,42 @@
         </main>
     </div>
 
-    <div id="modal" class="modal">
+    <div id="modalKey" class="modal">
         <div class="modal-content">
             <h2>API-Schlüssel erforderlich</h2>
             <p>Bitte gib deinen OpenAI API-Schlüssel ein:</p>
             <input type="password" id="apiKeyInput" placeholder="API-Schlüssel">
-            <button id="saveApiKey">Speichern</button>
+            <button id="saveApiKey">Save</button>
         </div>
     </div>
+    
+    <div id="modalUserLang" class="modal">
+        <div class="modal-content">
+            <h2>What is your native language?</h2>
+            <p>Please enter your native language in English:</p>
+            <input type="text" id="userLanguageInput" placeholder="For example: German">
+            <button id="saveUserLanguage">Save</button>
+        </div>
+    </div>
+    
+    <div id="modalTrainingLang" class="modal">
+        <div class="modal-content">
+            <h2>Which language do you want to learn?</h2>
+            <p>Please enter the language you want to train English:</p>
+            <input type="text" id="trainingLanguageInput" placeholder="For example: French">
+            <button id="saveTrainingLanguage">Save</button>
+        </div>
+    </div>
+
+    <div id="modalFirstVocab" class="modal">
+        <div class="modal-content">
+            <h2>Add Your First Vocabulary</h2>
+            <p>Please enter your first vocabulary item in the language you are learning:</p>
+            <input type="text" id="firstVocabInput" placeholder="Enter vocabulary">
+            <button id="saveFirstVocab">Save</button>
+        </div>
+    </div>
+    
     <input type="text" id="hiddenInput" style="position: absolute; top: -1000px; left: -1000px;">
 
     <script src="script.js"></script>

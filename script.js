@@ -323,7 +323,7 @@ async function requestApiKey() {
                     // Setze den Button-Text zurück
                     saveApiKeyButton.textContent = 'Save';
                     saveApiKeyButton.disabled = false;
-                    requestUserLanguage();
+                    requestTrainingLanguage();
                 } catch (encryptionError) {
                     console.error('Encryption failed:', encryptionError);
                     alert('An error occurred while encrypting the API key. Please try again.');

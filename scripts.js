@@ -113,7 +113,7 @@ let uiText = {
     skipVocabAlt: 'I don\'t need to train this anymore',
     restartButtonAlt: 'Retrain all vocabulary',
     resetAppButtonAlt: 'Delete all settings and vocabulary',
-    resetAppConfirmation: 'Are you sure you want to reset the application? This will delete all vocabulary items and reset all settings. Your progress will be lost.',
+    resetAppConfirmation: 'Are you sure you want to reset the api key?',
     addVocabPrompt: 'Please enter the new vocabulary or sentece (sentences always with punctuation, like . / ! / ?):',
     addVocabSuccess: 'Vocabulary added!',
     enterAllVocabPrompt: 'Please enter all three vocabulary items to start.',
@@ -739,7 +739,12 @@ function addVocab() {
 function resetApp() {
     const confirmation = confirm(uiText.resetAppConfirmation);
     if (confirmation) {
-        localStorage.clear();
+        //localStorage.clear();
+
+        function deleteApiKey() {
+            localStorage.removeItem('apiKey');
+        }
+
         location.reload();
     }
 }

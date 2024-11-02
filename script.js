@@ -97,7 +97,8 @@ let nextButton;
 let explanationContainer;
 let explanationElement;
 let restartButton;
-let resetAppButton; // Added for reset functionality
+let resetAppButton;
+let infoWindowButton;
 let userForm;
 let userAnswerElement;
 
@@ -241,6 +242,32 @@ function updateUIElements() {
 }
 
 // Function to show the API key modal
+function infoWindowFirst() {
+    const modalKey = document.getElementById('modalInfo');
+    modalKey.style.display = 'block';
+    const infoRead = modalKey.querySelector('#infoRead');
+
+    // Remove existing event listeners to prevent duplicates
+    infoRead.replaceWith(infoRead.cloneNode(true));
+    document.getElementById('infoRead').addEventListener('click', async () => {
+        modalKey.style.display = 'none';
+        requestApiKey();
+    });
+}
+
+function infoWindowLater() {
+    const modalKey = document.getElementById('modalInfo');
+    modalKey.style.display = 'block';
+    const infoRead = modalKey.querySelector('#infoRead');
+
+    // Remove existing event listeners to prevent duplicates
+    infoRead.replaceWith(infoRead.cloneNode(true));
+    document.getElementById('infoRead').addEventListener('click', async () => {
+        modalKey.style.display = 'none';
+    });
+}
+
+// Function to show the API key modal
 function requestApiKey() {
     const modalKey = document.getElementById('modalKey');
     modalKey.style.display = 'block';
@@ -315,7 +342,7 @@ const storedUserLanguage = localStorage.getItem('userLanguage');
 const storedTrainingLanguage = localStorage.getItem('trainingLanguage');
 
 if (!storedApiKey) {
-    requestApiKey();
+    infoWindowFirst();
 } else if (!storedTrainingLanguage) {
     requestTrainingLanguage();
 } else if (!storedUserLanguage) {
@@ -343,6 +370,7 @@ async function initializeApp() {
     explanationElement = document.getElementById('explanation');
     restartButton = document.getElementById('restartButton');
     resetAppButton = document.getElementById('resetApp'); // Initialize resetAppButton
+    infoWindowButton = document.getElementById('infoWindowLater'); // Initialize resetAppButton
     userForm = document.getElementById('userForm');
     userAnswerElement = document.getElementById('userAnswer');
 
@@ -425,6 +453,7 @@ function promptInitialVocabularies() {
 function setupEventListeners() {
     restartButton.addEventListener('click', restartTraining);
     resetAppButton.addEventListener('click', resetApp);
+    infoWindowButton.addEventListener('click', infoWindowLater);
     document.getElementById('addVocab').addEventListener('click', addVocab);
     document.getElementById('skipVocab').addEventListener('click', skipVocab);
     submitButton.addEventListener('click', submitAnswer);

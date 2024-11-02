@@ -24,6 +24,7 @@
                 <button class="blue" id="restartButton" style="display: none;"
                     title="Reset the vocabulary training list">⏎</button>
                 <button class="gray" id="resetApp" title="Reset Application">⌫</button>
+                <button class="gray" id="infoWindowLater" title="About">?</button>
             </div>
         </header>
 
@@ -46,12 +47,34 @@
     </div>
 
     <!-- Modals -->
+
+    <div id="modalInfo" class="modal">
+        <div class="modal-content">
+            <h2>Welcome</h2>
+            <p>This AI powered tool can help you learn vocabulary, phrases and grammar alongside your daily language
+                learning in tools like Duolingo or classic language courses. It doesn't matter what language you speak
+                or want to learn 🇪🇸🇫🇷🇩🇪🇬🇧🇵🇹🇫🇮🇩🇰🇳🇱🇺🇦... Even Klingon works (to some extent... I guess)!
+                It is still in development, so any <a href="mailto:vocabulary-alpha-feedback@storbeck.me">feedback is
+                    welcome</a>.</p>
+            <p class="comment">AI processing is not free. But I don't want your money or data. This is a hobby project I made for my wonderful wife to practice French. More on that in the next
+                step... If you wonder who made this - click here to find out more <a href="https://storbeck.me"
+                    target="_blank">about me + imprint</a>.</p>
+            <button id="infoRead">Understood, let's go...</button>
+        </div>
+    </div>
+
     <div id="modalKey" class="modal">
         <div class="modal-content">
             <h2>API Key Required</h2>
             <p>Please enter your OpenAI API key. </p>
-            <p class="comment">This is needed to create the AI connection. You can create one in <a href="https://platform.openai.com/api-keys"
-                        target="_blank">your OpenAI Playground</a>. Otherwise I would have to sell you a subscription, and honestly, who needs that? The tool uses the OpenAI chat model gpt-4o-mini. Based on your usage of this tool, OpenAI will <a href ="https://openai.com/api/pricing/" target="_blank">charge your account</a> (our normal everyday usage is within fractions of cents). At no point in time the developer of this application will know your API key (you can check the <a href="https://github.com/Starkgroup/vokabeltrainer-franz" target="_blank">full source code on GitHub</a>). It will only be stored encrypted in your browser.</p>
+            <p class="comment">This is needed to create the AI connection. You can create one in <a
+                    href="https://platform.openai.com/api-keys" target="_blank">your OpenAI Playground</a>. Otherwise I
+                would have to sell you a subscription, and honestly, who needs that? The tool uses the OpenAI chat model
+                gpt-4o-mini. Based on your usage of this tool, OpenAI will <a href="https://openai.com/api/pricing/"
+                    target="_blank">charge your account</a> (our normal everyday usage is within fractions of cents). At
+                no point in time the developer of this application will know your API key (you can check the <a
+                    href="https://github.com/Starkgroup/vokabeltrainer-franz" target="_blank">full source code on
+                    GitHub</a>). It will only be stored encrypted in your browser.</p>
             <input type="password" id="apiKeyInput" placeholder="API Key">
             <button id="saveApiKey">Save</button>
         </div>
@@ -82,8 +105,9 @@
             <input type="text" id="firstVocabInput1" placeholder="Enter vocabulary">
             <input type="text" id="firstVocabInput2" placeholder="Enter vocabulary">
             <input type="text" id="firstVocabInput3" placeholder="Enter vocabulary">
-            <p class="comment" id="vocabularyNote">Please note: This is an experimental tool. There is no login - all information will be stored on this device. By deleting the cache, your progress will also be lost.</p>
-    <button id="saveFirstVocab">Save</button>
+            <p class="comment" id="vocabularyNote">Please note: This is an experimental tool. There is no login - all
+                information will be stored on this device. By deleting the cache, your progress will also be lost.</p>
+            <button id="saveFirstVocab">Save</button>
         </div>
     </div>
 

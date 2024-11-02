@@ -558,8 +558,21 @@ async function loadNextQuestion() {
 
 function getHighScoreVocabs() {
     if (vocabList.length === 0) return [];
-    const maxScore = Math.max(...vocabList.map(v => v.score));
-    return vocabList.filter(v => v.score >= maxScore - 2 && v.score >= 1);
+
+    // Generate a random integer between 0 and 2 (inclusive)
+    const randomChance = Math.floor(Math.random() * 3); // Possible values: 0, 1, 2
+
+    if (randomChance === 0) { // 1 in 3 chance
+        // Select a random vocab item
+        const randomIndex = Math.floor(Math.random() * vocabList.length);
+        return [vocabList[randomIndex]]; // Return as an array to maintain consistent return type
+    } else {
+        // Proceed with high-score filtering
+        const maxScore = Math.max(...vocabList.map(v => v.score));
+        
+        // Filter vocabularies with scores within 3 points of the maxScore and at least 1
+        return vocabList.filter(v => v.score >= (maxScore - 3) && v.score >= 1);
+    }
 }
 
 function selectRandomVocab() {
@@ -608,7 +621,7 @@ async function generateTask(word) {
     }
     const method = methods[Math.floor(Math.random() * methods.length)];
 
-    const systemPrompt = `The assistant is an encouraging, helpful and friendly supporter in learning ${trainingLanguage} vocabulary and sentences. When creating a task for the user, the assistant always pays attention to the correct usage of the ${trainingLanguage} language, like grammar, sentence structure and spelling. The assistant avoids unnecessary phrases like "thank you very much", "sure!" or "of course I will help you". The assistant will only formulate the task in  ${userLanguage} and as if the assistant is talking to the user directly. `;
+    const systemPrompt = `The assistant is an supporter in learning ${trainingLanguage} vocabulary and sentences. When creating a task for the user, the assistant always pays attention to the correct usage of the ${trainingLanguage} language, like grammar, sentence structure and spelling. The assistant avoids unnecessary phrases like "thank you very much", "sure!" or "of course I will help you". The assistant will only formulate the task in  ${userLanguage} and as if the assistant is talking to the user directly. The assistant will not put the answer to a task in the task description.`;
 
     let response = await callChatGPTAPI(systemPrompt, method);
 
@@ -630,7 +643,7 @@ async function submitAnswer() {
     const userLanguage = localStorage.getItem('userLanguage');
     const trainingLanguage = localStorage.getItem('trainingLanguage');
 
-    const systemPrompt = `The assistant is an encouraging, helpful and friendly supporter in learning ${trainingLanguage} vocabulary and sentences. When evaluating answers, the assistant always pays attention to the correct usage of the ${trainingLanguage} language, like grammar, sentence structure and spelling. The assistant avoids unnecessary phrases like "thank you very much", "sure!" or "of course I will help you". It will only formulate the review as if the assistant is talking to the user directly. `;
+    const systemPrompt = `The assistant is an encouraging, helpful and friendly supporter in learning ${trainingLanguage} vocabulary and sentences. When evaluating answers, the assistant always pays attention to the correct usage of the ${trainingLanguage} language, like grammar, sentence structure and spelling. It will only formulate the review as if the assistant is talking to the user directly.`;
 
     const checkPrompt = `The assistant will check the following user answer to the given task and return a JSON with '"correct": true / false / null' and an evaluation for the user in the field "explanation" with  ${userLanguage} text in Markdown format (for full sentences including punctuation) - the assistant will never use quotation marks like """ in the JSON as this may invalidate the JSON. If the answer is correct, the evaluation can be short and simple but may also include additional usages, information about the origin, or declensions of the word. If the answer is incorrect, the assistant explains to the user informally (for example in German using "du") how to avoid these mistakes in the future, pointing out correct spellings, easily confusable words, or grammatical connections if necessary. In the evaluation, all ${trainingLanguage} vocabulary or ${trainingLanguage} sentences should be italicized. For small spelling errors (missing letters or missing accents, for example), "correct": null can be returned, but the evaluation should point out the minor mistakes.
 

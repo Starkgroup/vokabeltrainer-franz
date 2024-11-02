@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vokabeltrainer</title>
+
+    <title>Vocabulary Trainer</title>
     <link rel="stylesheet" href="style.css">
 
     <link rel="apple-touch-icon" href="icon.png">
 
-    <meta property="og:title" content="Dein Vokabeltrainer">
+    <meta property="og:title" content="Your Vocabulary Trainer">
     <meta property="og:description"
-        content="Lerne Französisch effektiv mit deinem interaktiven AI-Vokabeltrainer Franz.">
+        content="Train with AI using your native language and the language you want to learn.">
     <meta property="og:image" content="icon.jpg">
     <meta property="og:url" content="https://franz.storbeck.me">
     <meta property="og:type" content="website">
@@ -20,26 +21,24 @@
 <body>
     <div class="container">
         <header>
-            <h1>Alors...</h1>
+            <h1>Welcome</h1>
             <div class="buttons">
-                <button class="orange" id="addVocab">✚</button>
-                <button id="skipVocab" class="green" id="skipVocab">✓</button>
-                <!--button class="red" id="shuffleVocab"></button-->
-                <button class="blue" id="restartButton" style="display: none;">⏎</button>
+                <button class="orange" id="addVocab" alt="Add Vocabulary">✚</button>
+                <button class="green" id="skipVocab" alt="Remove from vocabulary training list">✓</button>
+                <button class="blue" id="restartButton" style="display: none;" alt="Reset the vocabulary training list">⏎</button>
             </div>
         </header>
 
         <main>
             <div id="taskContainer">
-                <p id="task">Lade Aufgabe...</p>
+                <p id="task">Loading task...</p>
             </div>
             <form id="userForm">
-                <textarea type="text" id="userAnswer" placeholder="Deine Antwort"></textarea>
-                <input type="text" id="hiddenInput" style="position: absolute; top: -1000px; left: -1000px;">
+                <textarea id="userAnswer" placeholder="Your answer"></textarea>
             </form>
             <div class="action-buttons">
-                <button id="submitAnswer">►</button>
-                <button id="nextQuestion" style="display: none;">►►</button>
+                <button id="submitAnswer">Review my answer</button>
+                <button id="nextQuestion" style="display: none;">Next task, please</button>
             </div>
             <div id="explanationContainer" style="display: none;">
                 <p id="explanation"></p>
@@ -47,15 +46,16 @@
         </main>
     </div>
 
+    <!-- Modals -->
     <div id="modalKey" class="modal">
         <div class="modal-content">
-            <h2>API-Schlüssel erforderlich</h2>
-            <p>Bitte gib deinen OpenAI API-Schlüssel ein:</p>
-            <input type="password" id="apiKeyInput" placeholder="API-Schlüssel">
+            <h2>API Key Required</h2>
+            <p>Please enter your OpenAI API key:</p>
+            <input type="password" id="apiKeyInput" placeholder="API Key">
             <button id="saveApiKey">Save</button>
         </div>
     </div>
-    
+
     <div id="modalUserLang" class="modal">
         <div class="modal-content">
             <h2>What is your native language?</h2>
@@ -64,11 +64,11 @@
             <button id="saveUserLanguage">Save</button>
         </div>
     </div>
-    
+
     <div id="modalTrainingLang" class="modal">
         <div class="modal-content">
             <h2>Which language do you want to learn?</h2>
-            <p>Please enter the language you want to train English:</p>
+            <p>Please enter the language you want to train in English:</p>
             <input type="text" id="trainingLanguageInput" placeholder="For example: French">
             <button id="saveTrainingLanguage">Save</button>
         </div>
@@ -76,14 +76,14 @@
 
     <div id="modalFirstVocab" class="modal">
         <div class="modal-content">
-            <h2>Add Your First Vocabulary</h2>
-            <p>Please enter your first vocabulary item in the language you are learning:</p>
-            <input type="text" id="firstVocabInput" placeholder="Enter vocabulary">
+            <h2>Add Your First Vocabularies</h2>
+            <p>Please enter your first three vocabulary items in the language you are learning:</p>
+            <input type="text" id="firstVocabInput1" placeholder="Enter vocabulary">
+            <input type="text" id="firstVocabInput2" placeholder="Enter vocabulary">
+            <input type="text" id="firstVocabInput3" placeholder="Enter vocabulary">
             <button id="saveFirstVocab">Save</button>
         </div>
     </div>
-    
-    <input type="text" id="hiddenInput" style="position: absolute; top: -1000px; left: -1000px;">
 
     <script src="script.js"></script>
 </body>

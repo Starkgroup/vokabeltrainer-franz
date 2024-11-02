@@ -1,4 +1,4 @@
-/* styles.css */
+/* style.css */
 
 body {
     font-family: Arial, sans-serif;
@@ -60,7 +60,6 @@ header h1 {
     background-color: darkorange;
 }
 
-
 main {
     margin-top: 20px;
 }
@@ -69,7 +68,6 @@ main {
     margin-top: 10px;
     min-height: 5.5em;
 }
-
 
 #userAnswer {
     width: calc(100vw - 60px);
@@ -83,13 +81,17 @@ main {
     border-color: lightgray;
     line-height: 1.3em;
     font-size: 1.1em;
-
 }
 
 .action-buttons {
     position: fixed;
-    bottom: 0;
-    margin-bottom: 10px;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 1000;
+    padding: 0 10px;
 }
 
 .action-buttons button {
@@ -97,16 +99,15 @@ main {
     padding: 5px;
     cursor: pointer;
     border: none;
-    background-color: transparent;
+    background-color: lightblue;
     width: calc(100vw - 40px);
     max-width: calc(600px - 20px);
-    border: none;
     color: white;
     border-radius: 5px;
-    background-color: lightblue;
 }
 
-.action-buttons button:active, .action-buttons button:hover {
+.action-buttons button:active,
+.action-buttons button:hover {
     background-color: slategray;
 }
 
@@ -159,13 +160,13 @@ main {
 }
 
 .correct {
-    background-color: #d4edda; /* Grünlich für korrekte Antwort */
+    background-color: #d4edda;
 }
 
 .incorrect {
-    background-color: #f8d7da; /* Rötlich für falsche Antwort */
+    background-color: #f8d7da;
 }
 
 .partial {
-    background-color: #fff3cd; /* Gelblich für teilweise korrekte Antwort */
+    background-color: #fff3cd;
 }

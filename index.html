@@ -31,11 +31,11 @@
         <main>
             <div id="taskContainer">
                 <p id="task">Loading task...</p>
+                <form id="userForm">
+                    <textarea id="userAnswer" placeholder="Your answer"></textarea>
+                    <input type="text" id="hiddenInput" style="position: absolute; top: -1000px; left: -1000px;">
+                </form>
             </div>
-            <form id="userForm">
-                <textarea id="userAnswer" placeholder="Your answer"></textarea>
-                <input type="text" id="hiddenInput" style="position: absolute; top: -1000px; left: -1000px;">
-            </form>
             <div class="action-buttons">
                 <button id="submitAnswer">Review my answer</button>
                 <button id="nextQuestion" style="display: none;">Next task, please</button>
@@ -56,7 +56,8 @@
                 or want to learn 🇪🇸🇫🇷🇩🇪🇬🇧🇵🇹🇫🇮🇩🇰🇳🇱🇺🇦... Even Klingon works (to some extent... I guess)!
                 It is still in development, so any <a href="mailto:vocabulary-alpha-feedback@storbeck.me">feedback is
                     welcome</a>.</p>
-            <p class="comment">AI processing is not free. But I don't want your money or data. This is a hobby project I made for my wonderful wife to practice French. More on that in the next
+            <p class="comment">AI processing is not free. But I don't want your money or data. This is a hobby project I
+                made for my wonderful wife to practice French. More on that in the next
                 step... If you wonder who made this - click here to find out more <a href="https://storbeck.me"
                     target="_blank">about me + imprint</a>.</p>
             <p class="comment" id="version">Version 0.1</p>

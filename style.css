@@ -243,3 +243,12 @@ div.buttonContainer {
 #version {
     text-align: center;
 }
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+button {
+    transition: opacity 0.3s ease, cursor 0.3s ease;
+}

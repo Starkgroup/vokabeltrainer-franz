@@ -1,6 +1,6 @@
 // script.js
 
-const version = 'Version 0.1a'
+const version = 'Version 0.1b'
 
 // Utility function to convert a string to ArrayBuffer
 function strToArrayBuffer(str) {
@@ -532,12 +532,18 @@ function setupEventListeners() {
 }
 
 async function loadNextQuestion() {
+    // Hide the nextQuestion button immediately
+    nextButton.style.display = 'none';
+
+    // Reset UI elements
     userAnswerElement.classList.remove('correct', 'incorrect', 'partial');
     isAwaitingAnswer = true;
-    submitButton.style.display = 'inline-block';
-    nextButton.style.display = 'none';
     explanationContainer.style.display = 'none';
     userAnswerElement.value = '';
+    userAnswerElement.disabled = false; // Re-enable the input for the new question
+
+    // Optionally, you can show a loading indicator here
+    taskElement.textContent = uiText.loadingTask;
 
     const highScoreVocabs = getHighScoreVocabs();
     if (highScoreVocabs.length === 0) {
@@ -553,11 +559,25 @@ async function loadNextQuestion() {
     currentVocab = selectRandomVocab();
     if (!currentVocab) {
         console.error('No vocabulary available to select.');
+        // Optionally, show the submit button again
+        submitButton.style.display = 'inline-block';
         return;
     }
-    currentTask = await generateTask(currentVocab.word);
-    taskElement.innerHTML = currentTask;
+
+    try {
+        currentTask = await generateTask(currentVocab.word);
+        taskElement.innerHTML = currentTask;
+
+        // Show the submit button after the new task is loaded
+        submitButton.style.display = 'inline-block';
+    } catch (error) {
+        console.error('Error loading next question:', error);
+        taskElement.textContent = 'Error loading the next task. Please try again.';
+        // Optionally, show the nextButton again to allow retry
+        nextButton.style.display = 'inline-block';
+    }
 }
+
 
 function getHighScoreVocabs() {
     if (vocabList.length === 0) return [];
@@ -619,12 +639,12 @@ async function generateTask(word) {
             `The user wants to practice the ${trainingLanguage} vocabulary '${word}'. The assistant will create a ${userLanguage} sentence with the translation and formulate a request in ${userLanguage} for the user to translate this sentence into ${trainingLanguage}. The assistant will not hint at the vocabulary '${word}', because that is what the user wants to train!`,
             `The assistant will formulate in ${userLanguage} a request for the user to translate '${word}' from ${trainingLanguage} into ${userLanguage}. The request must contain the word '${word}' (if the word is a noun, use it with the correct ${trainingLanguage} article, for example in German "der/die/das")!`,
             `The assistant will formulate in ${userLanguage} a request for the user to translate the approximate meaning of the ${trainingLanguage} vocabulary '${word}' from ${userLanguage} into ${trainingLanguage}. The assistant will not hint at the answer '${word}', because that is what the user wants to train. The request must contain the ${userLanguage} translation as a word!`,
-            `The assistant will formulate in ${userLanguage} a request for the user to transform the ${trainingLanguage} vocabulary '${word}', (if it's a verb, decline it correctly for example, for nouns create the plural or something similar). The request will be simple and focused on one task, not for example five full sentences, but a full declination is okay. The assistant will not hint at the answer to the task, because that is what the user wants to train. The request must contain the ${userLanguage} translation as a word!`,
+            `The assistant will formulate in ${userLanguage} a request for the user to transform the ${trainingLanguage} vocabulary '${word}', (if it's a verb, decline it correctly for example, for nouns create the plural or something similar). The request will be simple and focused on one task, not for example five full sentences, but a full declination is okay. The assistant will not hint at the answer to the task and not give the translation, because that is what the user wants to train.`,
         ];
     }
     const method = methods[Math.floor(Math.random() * methods.length)];
 
-    const systemPrompt = `The assistant is an supporter in learning ${trainingLanguage} vocabulary and sentences. When creating a task for the user, the assistant always pays attention to the correct usage of the ${trainingLanguage} language, like grammar, sentence structure and spelling. The assistant avoids unnecessary phrases like "thank you very much", "sure!" or "of course I will help you". The assistant will only formulate the task in  ${userLanguage} and as if the assistant is talking to the user directly. The assistant will not put the answer to a task in the task description.`;
+    const systemPrompt = `The assistant is an supporter in learning ${trainingLanguage} vocabulary and sentences. When creating a task for the user, the assistant always pays attention to the correct usage of the ${trainingLanguage} language, like grammar, sentence structure and spelling. The assistant avoids unnecessary phrases like "thank you very much", "sure!" or "of course I will help you". The assistant will only formulate the task in  ${userLanguage} and as if the assistant is talking to the user directly. The assistant uses informal language (e.g. in German "Du"). The assistant will not put the answer to a task in the task description.`;
 
     let response = await callChatGPTAPI(systemPrompt, method);
 
@@ -635,20 +655,27 @@ async function generateTask(word) {
 
 async function submitAnswer() {
     if (!isAwaitingAnswer) return;
+
     const userAnswer = userAnswerElement.value.trim();
-    if (!userAnswer) return;
+    if (!userAnswer) {
+        alert(uiText.yourAnswerPlaceholder);
+        return;
+    }
 
     isAwaitingAnswer = false;
+
+    // Hide the submit button and disable the input to prevent further input
     submitButton.style.display = 'none';
-    nextButton.style.display = 'inline-block';
+    userAnswerElement.disabled = true;
     explanationContainer.style.display = 'none';
 
-    const userLanguage = localStorage.getItem('userLanguage');
-    const trainingLanguage = localStorage.getItem('trainingLanguage');
+    try {
+        const userLanguage = localStorage.getItem('userLanguage');
+        const trainingLanguage = localStorage.getItem('trainingLanguage');
 
-    const systemPrompt = `The assistant is an encouraging, helpful and friendly supporter in learning ${trainingLanguage} vocabulary and sentences. When evaluating answers, the assistant always pays attention to the correct usage of the ${trainingLanguage} language, like grammar, sentence structure and spelling. It will only formulate the review as if the assistant is talking to the user directly.`;
+        const systemPrompt = `The assistant is an encouraging, helpful and friendly supporter in learning ${trainingLanguage} vocabulary and sentences. When evaluating answers, the assistant always pays attention to the correct usage of the ${trainingLanguage} language, like grammar, sentence structure and spelling. It will only formulate the review as if the assistant is talking to the user directly.`;
 
-    const checkPrompt = `The assistant will check the following user answer to the given task and return a JSON with '"correct": true / false / null' and an evaluation for the user in the field "explanation" with  ${userLanguage} text in Markdown format (for full sentences including punctuation) - the assistant will never use quotation marks like """ in the JSON as this may invalidate the JSON. If the answer is correct, the evaluation can be short and simple but may also include additional usages, information about the origin, or declensions of the word. If the answer is incorrect, the assistant explains to the user informally (for example in German using "du") how to avoid these mistakes in the future, pointing out correct spellings, easily confusable words, or grammatical connections if necessary. In the evaluation, all ${trainingLanguage} vocabulary or ${trainingLanguage} sentences should be italicized. For small spelling errors (missing letters or missing accents, for example), "correct": null can be returned, but the evaluation should point out the minor mistakes.
+        const checkPrompt = `The assistant will check the following user answer to the given task and return a JSON with '"correct": true / false / null' and an evaluation for the user in the field "explanation" with  ${userLanguage} text in Markdown format (for full sentences including punctuation) - the assistant will never use quotation marks like """ in the JSON as this may invalidate the JSON. If the answer is correct, the evaluation can be short and simple but may also include additional usages, information about the origin, or declensions of the word. If the answer is incorrect, the assistant explains to the user informally (for example in German using "du") how to avoid these mistakes in the future, pointing out correct spellings, easily confusable words, or grammatical connections if necessary. In the evaluation, all ${trainingLanguage} vocabulary or ${trainingLanguage} sentences should be italicized. For small spelling errors (missing letters or missing accents, for example), "correct": null can be returned, but the evaluation should point out the minor mistakes.
 
 Vocabulary: ${currentVocab.word}
 
@@ -656,29 +683,43 @@ Task: ${currentTask}
 
 User's answer: ${userAnswer} - if the user doesn't know the answer, provide detailed assistance. Evaluate errors for the user in a detailed and friendly manner, offering help in deriving the incorrect words or sentences from ${userLanguage} into ${trainingLanguage}. If the user does not add an article to a noun, the assistant always reminds the user of the correct article (like der/die/das in German). If the user responds approximately correctly but not exactly with ${currentVocab.word}, this should be considered "correct": null. Finally, point out things like synonyms, antonyms, declination or related words.`;
 
-    const response = await callChatGPTAPI(systemPrompt, checkPrompt);
+        const response = await callChatGPTAPI(systemPrompt, checkPrompt);
 
-    try {
-        const result = JSON.parse(response);
-        explanationContainer.style.display = 'block';
-        explanationElement.innerHTML = markdownToHTML(result.explanation);
-        adjustScore(result.correct);
-        enableVocabClick();
+        try {
+            const result = JSON.parse(response);
+            explanationContainer.style.display = 'block';
+            explanationElement.innerHTML = markdownToHTML(result.explanation);
+            adjustScore(result.correct);
+            enableVocabClick();
 
-        userAnswerElement.classList.remove('correct', 'incorrect', 'partial');
+            userAnswerElement.classList.remove('correct', 'incorrect', 'partial');
 
-        if (result.correct === true) {
-            userAnswerElement.classList.add('correct');
-        } else if (result.correct === false) {
-            userAnswerElement.classList.add('incorrect');
-        } else if (result.correct === null) {
-            userAnswerElement.classList.add('partial');
+            if (result.correct === true) {
+                userAnswerElement.classList.add('correct');
+            } else if (result.correct === false) {
+                userAnswerElement.classList.add('incorrect');
+            } else if (result.correct === null) {
+                userAnswerElement.classList.add('partial');
+            }
+
+            // Show the nextQuestion button after processing the response
+            nextButton.style.display = 'inline-block';
+        } catch (e) {
+            console.error('Error processing the answer:', e);
+            explanationContainer.style.display = 'block';
+            explanationElement.textContent = 'Error processing the answer.';
+            // Optionally, show the submit button again to allow retry
+            submitButton.style.display = 'inline-block';
+            userAnswerElement.disabled = false;
+            isAwaitingAnswer = true;
         }
-
-    } catch (e) {
-        console.log(response);
-        explanationContainer.style.display = 'block';
-        explanationElement.textContent = 'Error processing the answer.';
+    } catch (error) {
+        console.error('Error during submitAnswer:', error);
+        alert('An error occurred while submitting your answer. Please try again.');
+        // Show the submit button again to allow retry
+        submitButton.style.display = 'inline-block';
+        userAnswerElement.disabled = false;
+        isAwaitingAnswer = true;
     }
 }
 
@@ -742,9 +783,9 @@ function addVocab() {
 function resetApp() {
     const confirmation = confirm(uiText.resetAppConfirmation);
     if (confirmation) {
-        // localStorage.clear();
-        localStorage.removeItem('apiKey');
-
+        localStorage.clear();
+        // ToDo: Multiple remove buttons in modal
+        // localStorage.removeItem('apiKey');
         location.reload();
     }
 }

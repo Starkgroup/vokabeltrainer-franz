@@ -408,11 +408,6 @@ if (!storedApiKey) {
 }
 
 async function initializeApp() {
-
-    function deleteApiKey() {
-        localStorage.removeItem('apiKey');
-    }
-    
     // Retrieve languages from localStorage
     const userLanguage = localStorage.getItem('userLanguage');
     const trainingLanguage = localStorage.getItem('trainingLanguage');

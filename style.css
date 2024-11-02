@@ -50,6 +50,10 @@ header h1 {
     background-color: darkred;
 }
 
+.buttons button.gray {
+    background-color: gray;
+}
+
 .buttons button.green {
     background-color: darkslategray;
 }

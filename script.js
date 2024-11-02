@@ -512,19 +512,19 @@ async function generateTask(word) {
     let methods = [];
     if (isSentence) {
         methods = [
-            `Leave out a difficult vocabulary word (single or compound words) in this sentence: ${word} - Replace the word with '...........' and ask the user in ${userLanguage} to fill in the blank, providing as a hint the ${userLanguage} translation of the missing word. The task should not contain the answer!`,
-            `Ask the user in ${userLanguage} for the approximate translation of the sentence from ${trainingLanguage} into ${userLanguage}: '${word}'. The task should not contain the answer '${word}', because that is what the user wants to train!`
+            `The assistant will leave out a difficult vocabulary word (single or compound words) in this ${trainingLanguage} sentence: ${word} - The assistant will replace the word with '...........' and ask the user in ${userLanguage} to fill in the blank, providing as a hint the ${userLanguage} translation of the missing word. The assistant will not hint at the answer in ${trainingLanguage}!`,
+            `The assistant will ask the user in ${userLanguage} for the approximate translation of the sentence from ${trainingLanguage} into ${userLanguage}: '${word}'. The assistant will not hint at the full sentence '${word}', because that is what the user wants to train!`
         ];
     } else {
         methods = [
-            `The user wants to practice the ${trainingLanguage} vocabulary '${word}'. Create a ${userLanguage} sentence with the translation and formulate in ${userLanguage} a request for the user to translate this sentence into ${trainingLanguage}. Your request should not contain the vocabulary '${word}', because that is what the user wants to train!`,
-            `Formulate in ${userLanguage} a request for the user to translate '${word}' from ${trainingLanguage} into ${userLanguage}. The request must contain the word '${word}' (if the word is a noun, use it with the correct ${trainingLanguage} article)!`,
-            `Formulate in ${userLanguage} a request for the user to translate the approximate meaning of the ${trainingLanguage} vocabulary '${word}' from ${userLanguage} into ${trainingLanguage}. The request should not contain the answer '${word}', because that is what the user wants to train. The request must contain the ${userLanguage} translation as a word!`
+            `The user wants to practice the ${trainingLanguage} vocabulary '${word}'. The assistant will create a ${userLanguage} sentence with the translation and formulate a request in ${userLanguage} for the user to translate this sentence into ${trainingLanguage}. The assistant will not hint at the vocabulary '${word}', because that is what the user wants to train!`,
+            `The assistant will formulate in ${userLanguage} a request for the user to translate '${word}' from ${trainingLanguage} into ${userLanguage}. The request must contain the word '${word}' (if the word is a noun, use it with the correct ${trainingLanguage} article, for example in German "der/die/das")!`,
+            `The assistant will formulate in ${userLanguage} a request for the user to translate the approximate meaning of the ${trainingLanguage} vocabulary '${word}' from ${userLanguage} into ${trainingLanguage}. The assistant will not hint at the answer '${word}', because that is what the user wants to train. The request must contain the ${userLanguage} translation as a word!`
         ];
     }
     const method = methods[Math.floor(Math.random() * methods.length)];
 
-    const systemPrompt = `The assistant is an encouraging, helpful and friendly supporter in learning ${trainingLanguage} vocabulary and sentences. When evaluating answers, the assistant always pays attention to the correct usage of the ${trainingLanguage} language, like grammar, sentence structure and spelling. The assistant avoids unnecessary phrases like "thank you very much".`;
+    const systemPrompt = `The assistant is an encouraging, helpful and friendly supporter in learning ${trainingLanguage} vocabulary and sentences. When evaluating answers, the assistant always pays attention to the correct usage of the ${trainingLanguage} language, like grammar, sentence structure and spelling. The assistant avoids unnecessary phrases like "thank you very much", "sure!" or "of course I will help you". It will only formulate the task as if the assistant is talking to the user directly.`;
 
     let response = await callChatGPTAPI(systemPrompt, method);
 
@@ -542,7 +542,6 @@ async function submitAnswer() {
     submitButton.style.display = 'none';
     nextButton.style.display = 'inline-block';
     explanationContainer.style.display = 'none';
-    userAnswerElement.value = '';
 
     const userLanguage = localStorage.getItem('userLanguage');
     const trainingLanguage = localStorage.getItem('trainingLanguage');
@@ -555,7 +554,7 @@ Vocabulary: ${currentVocab.word}
 
 Task: ${currentTask}
 
-User's answer: ${userAnswer} - if the user doesn't know the answer, provide detailed assistance. Evaluate errors for the user in a detailed and friendly manner, offering help in deriving the incorrect words or sentences from ${userLanguage} into ${trainingLanguage}. If the user responds approximately correctly but not exactly with ${currentVocab.word}, this should be considered correct. Finally, point out synonyms, antonyms, or related words.`;
+User's answer: ${userAnswer} - if the user doesn't know the answer, provide detailed assistance. Evaluate errors for the user in a detailed and friendly manner, offering help in deriving the incorrect words or sentences from ${userLanguage} into ${trainingLanguage}. If the user does not add an article to a noun, the assistant always reminds the user of the correct article (like der/die/das in German). If the user responds approximately correctly but not exactly with ${currentVocab.word}, this should be considered correct. Finally, point out synonyms, antonyms, or related words.`;
 
     const response = await callChatGPTAPI(systemPrompt, checkPrompt);
 
@@ -630,7 +629,6 @@ function addVocab() {
             vocabList.push({ word: newVocab, score: 5 });
             localStorage.setItem('vocabList', JSON.stringify(vocabList));
             modalAddVocab.style.display = 'none';
-            alert(uiText.addVocabSuccess);
         } else {
             alert('Please enter a valid vocabulary item.');
         }
@@ -731,7 +729,6 @@ function enableVocabClick() {
                     vocabList.push({ word: editedVocab, score: 5 });
                     localStorage.setItem('vocabList', JSON.stringify(vocabList));
                     modalAddVocab.style.display = 'none';
-                    alert(uiText.addVocabSuccess);
                 } else {
                     alert('Please enter a valid vocabulary item.');
                 }

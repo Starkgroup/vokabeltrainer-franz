@@ -1,20 +1,18 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
     <title>Vocabulary Trainer</title>
     <link rel="stylesheet" href="style.css">
-
     <link rel="apple-touch-icon" href="icon.png">
-
     <meta property="og:title" content="Your Vocabulary Trainer">
-    <meta property="og:description"
-        content="Train with AI using your native language and the language you want to learn.">
+    <meta property="og:description" content="Effectively learn with your interactive AI vocabulary trainer.">
     <meta property="og:image" content="icon.jpg">
-    <meta property="og:url" content="https://franz.storbeck.me">
+    <meta property="og:url" content="https://yourwebsite.com">
     <meta property="og:type" content="website">
 </head>
 
@@ -26,6 +24,7 @@
                 <button class="orange" id="addVocab" alt="Add Vocabulary">✚</button>
                 <button class="green" id="skipVocab" alt="Remove from vocabulary training list">✓</button>
                 <button class="blue" id="restartButton" style="display: none;" alt="Reset the vocabulary training list">⏎</button>
+                <button class="red" id="resetApp" alt="Reset Application">🗑️</button>
             </div>
         </header>
 
@@ -35,6 +34,7 @@
             </div>
             <form id="userForm">
                 <textarea id="userAnswer" placeholder="Your answer"></textarea>
+                <input type="text" id="hiddenInput" style="position: absolute; top: -1000px; left: -1000px;">
             </form>
             <div class="action-buttons">
                 <button id="submitAnswer">Review my answer</button>
@@ -89,3 +89,4 @@
 </body>
 
 </html>
+

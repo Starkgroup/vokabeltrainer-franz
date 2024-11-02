@@ -1,3 +1,5 @@
+
+
 // script.js
 
 let vocabList = [];
@@ -12,6 +14,7 @@ let nextButton;
 let explanationContainer;
 let explanationElement;
 let restartButton;
+let resetAppButton; // Added for reset functionality
 let userForm;
 let userAnswerElement;
 
@@ -25,27 +28,36 @@ let uiText = {
     addVocabAlt: 'Add Vocabulary',
     skipVocabAlt: 'Remove from vocabulary training list',
     restartButtonAlt: 'Reset the vocabulary training list',
+    resetAppButtonAlt: 'Reset Application',
+    resetAppConfirmation: 'Are you sure you want to reset the application? This will delete all vocabulary items and reset all settings.',
     addVocabPrompt: 'Please enter the new vocabulary or sentence:',
     addVocabSuccess: 'Vocabulary added!',
     enterAllVocabPrompt: 'Please enter all three vocabulary items to start.',
     learnedAllVocab: 'You have successfully learned all vocabularies, great job!',
     modal: {
         apiKeyRequired: 'API Key Required',
-        enterApiKey: 'Please enter your OpenAI API key:',
+        enterApiKeyPrompt: 'Please enter your OpenAI API key:',
         saveButton: 'Save',
-        enterNativeLanguage: 'What is your native language?',
-        enterNativeLanguagePlaceholder: 'For example: German',
-        enterTrainingLanguage: 'Which language do you want to learn?',
-        enterTrainingLanguagePlaceholder: 'For example: French',
-        addFirstVocab: 'Add Your First Vocabularies',
-        enterFirstThreeVocab: 'Please enter your first three vocabulary items in the language you are learning:',
-        enterVocabPlaceholder: 'Enter vocabulary'
+        userLangTitle: 'What is your native language?',
+        userLangPrompt: 'Please enter your native language in English:',
+        userLangPlaceholder: 'For example: German',
+        trainingLangTitle: 'Which language do you want to learn?',
+        trainingLangPrompt: 'Please enter the language you want to train in English:',
+        trainingLangPlaceholder: 'For example: French',
+        addFirstVocabTitle: 'Add Your First Vocabularies',
+        addFirstVocabPrompt: 'Please enter your first three vocabulary items in the language you are learning:',
+        addVocabPlaceholder: 'Enter vocabulary'
     }
 };
 
 // Function to translate UI text
 async function translateUIText(targetLanguage) {
     const apiKey = localStorage.getItem('apiKey');
+    if (!apiKey) {
+        console.error('API Key is missing. Please enter your OpenAI API key.');
+        return;
+    }
+
     const textToTranslate = JSON.stringify(uiText);
 
     const systemPrompt = 'You are a helpful assistant that translates JSON objects containing UI text into the target language while preserving the JSON structure.';
@@ -54,38 +66,47 @@ async function translateUIText(targetLanguage) {
 JSON to translate:
 ${textToTranslate}`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-            model: 'gpt-3.5-turbo',
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: userPrompt }
-            ]
-        })
-    });
-
-    const data = await response.json();
-    let translatedText = data.choices[0].message.content;
-
-    // Clean up the response to get valid JSON
-    translatedText = translatedText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
-
     try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-3.5-turbo',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ]
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        let translatedText = data.choices[0].message.content;
+
+        // Clean up the response to get valid JSON
+        translatedText = translatedText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
+
         uiText = JSON.parse(translatedText);
         // Store the translated UI text in localStorage with the language as a key
         localStorage.setItem(`uiText_${targetLanguage}`, JSON.stringify(uiText));
-    } catch (e) {
-        console.error('Error parsing translated UI text:', e);
+    } catch (error) {
+        console.error('Error translating UI text:', error);
     }
 }
 
 // Function to update UI elements with translated text
 function updateUIElements() {
+    if (!taskElement || !submitButton || !nextButton || !explanationElement || !restartButton || !resetAppButton || !userAnswerElement) {
+        console.error('One or more DOM elements are not initialized.');
+        return;
+    }
+
     document.querySelector('header h1').textContent = uiText.welcomeMessage;
     taskElement.textContent = uiText.loadingTask;
     userAnswerElement.placeholder = uiText.yourAnswerPlaceholder;
@@ -94,39 +115,52 @@ function updateUIElements() {
     document.getElementById('addVocab').alt = uiText.addVocabAlt;
     document.getElementById('skipVocab').alt = uiText.skipVocabAlt;
     restartButton.alt = uiText.restartButtonAlt;
+    resetAppButton.alt = uiText.resetAppButtonAlt;
 
     // Update modals
-    document.getElementById('modalKey').querySelector('h2').textContent = uiText.modal.apiKeyRequired;
-    document.getElementById('modalKey').querySelector('p').textContent = uiText.modal.enterApiKey;
-    document.getElementById('apiKeyInput').placeholder = uiText.modal.enterApiKey;
-    document.getElementById('saveApiKey').textContent = uiText.modal.saveButton;
+    // API Key Modal
+    const modalKey = document.getElementById('modalKey');
+    modalKey.querySelector('h2').textContent = uiText.modal.apiKeyRequired;
+    modalKey.querySelector('p').textContent = uiText.modal.enterApiKeyPrompt;
+    modalKey.querySelector('#saveApiKey').textContent = uiText.modal.saveButton;
 
-    document.getElementById('modalUserLang').querySelector('h2').textContent = uiText.modal.enterNativeLanguage;
-    document.getElementById('modalUserLang').querySelector('p').textContent = uiText.modal.enterNativeLanguage;
-    document.getElementById('userLanguageInput').placeholder = uiText.modal.enterNativeLanguagePlaceholder;
-    document.getElementById('saveUserLanguage').textContent = uiText.modal.saveButton;
+    // User Language Modal
+    const modalUserLang = document.getElementById('modalUserLang');
+    modalUserLang.querySelector('h2').textContent = uiText.modal.userLangTitle;
+    modalUserLang.querySelector('p').textContent = uiText.modal.userLangPrompt;
+    modalUserLang.querySelector('#userLanguageInput').placeholder = uiText.modal.userLangPlaceholder;
+    modalUserLang.querySelector('#saveUserLanguage').textContent = uiText.modal.saveButton;
 
-    document.getElementById('modalTrainingLang').querySelector('h2').textContent = uiText.modal.enterTrainingLanguage;
-    document.getElementById('modalTrainingLang').querySelector('p').textContent = uiText.modal.enterTrainingLanguage;
-    document.getElementById('trainingLanguageInput').placeholder = uiText.modal.enterTrainingLanguagePlaceholder;
-    document.getElementById('saveTrainingLanguage').textContent = uiText.modal.saveButton;
+    // Training Language Modal
+    const modalTrainingLang = document.getElementById('modalTrainingLang');
+    modalTrainingLang.querySelector('h2').textContent = uiText.modal.trainingLangTitle;
+    modalTrainingLang.querySelector('p').textContent = uiText.modal.trainingLangPrompt;
+    modalTrainingLang.querySelector('#trainingLanguageInput').placeholder = uiText.modal.trainingLangPlaceholder;
+    modalTrainingLang.querySelector('#saveTrainingLanguage').textContent = uiText.modal.saveButton;
 
-    document.getElementById('modalFirstVocab').querySelector('h2').textContent = uiText.modal.addFirstVocab;
-    document.getElementById('modalFirstVocab').querySelector('p').textContent = uiText.modal.enterFirstThreeVocab;
-    document.getElementById('firstVocabInput1').placeholder = uiText.modal.enterVocabPlaceholder;
-    document.getElementById('firstVocabInput2').placeholder = uiText.modal.enterVocabPlaceholder;
-    document.getElementById('firstVocabInput3').placeholder = uiText.modal.enterVocabPlaceholder;
-    document.getElementById('saveFirstVocab').textContent = uiText.modal.saveButton;
+    // First Vocab Modal
+    const modalFirstVocab = document.getElementById('modalFirstVocab');
+    modalFirstVocab.querySelector('h2').textContent = uiText.modal.addFirstVocabTitle;
+    modalFirstVocab.querySelector('p').textContent = uiText.modal.addFirstVocabPrompt;
+    modalFirstVocab.querySelector('#firstVocabInput1').placeholder = uiText.modal.addVocabPlaceholder;
+    modalFirstVocab.querySelector('#firstVocabInput2').placeholder = uiText.modal.addVocabPlaceholder;
+    modalFirstVocab.querySelector('#firstVocabInput3').placeholder = uiText.modal.addVocabPlaceholder;
+    modalFirstVocab.querySelector('#saveFirstVocab').textContent = uiText.modal.saveButton;
 }
 
 // Function to show the API key modal
 function requestApiKey() {
-    document.getElementById('modalKey').style.display = 'block';
+    const modalKey = document.getElementById('modalKey');
+    modalKey.style.display = 'block';
+    const saveApiKeyButton = modalKey.querySelector('#saveApiKey');
+
+    // Remove existing event listeners to prevent duplicates
+    saveApiKeyButton.replaceWith(saveApiKeyButton.cloneNode(true));
     document.getElementById('saveApiKey').addEventListener('click', async () => {
         const key = document.getElementById('apiKeyInput').value.trim();
         if (key) {
             localStorage.setItem('apiKey', key);
-            document.getElementById('modalKey').style.display = 'none';
+            modalKey.style.display = 'none';
             requestUserLanguage();
         }
     });
@@ -134,23 +168,29 @@ function requestApiKey() {
 
 // Function to show the user language modal
 function requestUserLanguage() {
-    document.getElementById('modalUserLang').style.display = 'block';
+    const modalUserLang = document.getElementById('modalUserLang');
+    modalUserLang.style.display = 'block';
+    const saveUserLangButton = modalUserLang.querySelector('#saveUserLanguage');
+
+    // Remove existing event listeners to prevent duplicates
+    saveUserLangButton.replaceWith(saveUserLangButton.cloneNode(true));
     document.getElementById('saveUserLanguage').addEventListener('click', async () => {
         const language = document.getElementById('userLanguageInput').value.trim();
         if (language) {
             localStorage.setItem('userLanguage', language);
-            document.getElementById('modalUserLang').style.display = 'none';
+            modalUserLang.style.display = 'none';
 
             // Check if the translated UI text is already in localStorage
             const storedUIText = localStorage.getItem(`uiText_${language}`);
             if (storedUIText) {
                 uiText = JSON.parse(storedUIText);
-                updateUIElements();
             } else {
                 // Translate UI text and store it
                 await translateUIText(language);
-                updateUIElements();
             }
+
+            // Note: Do NOT call updateUIElements here
+            // It will be called inside initializeApp after DOM elements are set
 
             requestTrainingLanguage();
         }
@@ -159,27 +199,32 @@ function requestUserLanguage() {
 
 // Function to show the training language modal
 function requestTrainingLanguage() {
-    document.getElementById('modalTrainingLang').style.display = 'block';
+    const modalTrainingLang = document.getElementById('modalTrainingLang');
+    modalTrainingLang.style.display = 'block';
+    const saveTrainingLangButton = modalTrainingLang.querySelector('#saveTrainingLanguage');
+
+    // Remove existing event listeners to prevent duplicates
+    saveTrainingLangButton.replaceWith(saveTrainingLangButton.cloneNode(true));
     document.getElementById('saveTrainingLanguage').addEventListener('click', () => {
         const language = document.getElementById('trainingLanguageInput').value.trim();
         if (language) {
             localStorage.setItem('trainingLanguage', language);
-            document.getElementById('modalTrainingLang').style.display = 'none';
+            modalTrainingLang.style.display = 'none';
             initializeApp();
         }
     });
 }
 
 // Check if all necessary data is available
-const apiKey = localStorage.getItem('apiKey');
-const userLanguage = localStorage.getItem('userLanguage');
-const trainingLanguage = localStorage.getItem('trainingLanguage');
+const storedApiKey = localStorage.getItem('apiKey');
+const storedUserLanguage = localStorage.getItem('userLanguage');
+const storedTrainingLanguage = localStorage.getItem('trainingLanguage');
 
-if (!apiKey) {
+if (!storedApiKey) {
     requestApiKey();
-} else if (!userLanguage) {
+} else if (!storedUserLanguage) {
     requestUserLanguage();
-} else if (!trainingLanguage) {
+} else if (!storedTrainingLanguage) {
     requestTrainingLanguage();
 } else {
     initializeApp();
@@ -203,6 +248,7 @@ async function initializeApp() {
     explanationContainer = document.getElementById('explanationContainer');
     explanationElement = document.getElementById('explanation');
     restartButton = document.getElementById('restartButton');
+    resetAppButton = document.getElementById('resetApp'); // Initialize resetAppButton
     userForm = document.getElementById('userForm');
     userAnswerElement = document.getElementById('userAnswer');
 
@@ -210,13 +256,14 @@ async function initializeApp() {
     const storedUIText = localStorage.getItem(`uiText_${userLanguage}`);
     if (storedUIText) {
         uiText = JSON.parse(storedUIText);
-        updateUIElements();
     } else {
-        if (userLanguage !== 'English') {
+        if (userLanguage.toLowerCase() !== 'english') {
             await translateUIText(userLanguage);
-            updateUIElements();
         }
     }
+
+    // Now, update the UI elements after DOM elements are set
+    updateUIElements();
 
     loadVocabList();
 
@@ -243,11 +290,12 @@ function loadVocabList() {
 }
 
 function promptInitialVocabularies() {
-    document.getElementById('modalFirstVocab').style.display = 'block';
+    const modalFirstVocab = document.getElementById('modalFirstVocab');
+    modalFirstVocab.style.display = 'block';
 
     // Remove any previous event listeners to prevent duplicates
-    const saveButton = document.getElementById('saveFirstVocab');
-    saveButton.replaceWith(saveButton.cloneNode(true));
+    const saveFirstVocabButton = modalFirstVocab.querySelector('#saveFirstVocab');
+    saveFirstVocabButton.replaceWith(saveFirstVocabButton.cloneNode(true));
     document.getElementById('saveFirstVocab').addEventListener('click', () => {
         const vocab1 = document.getElementById('firstVocabInput1').value.trim();
         const vocab2 = document.getElementById('firstVocabInput2').value.trim();
@@ -257,7 +305,7 @@ function promptInitialVocabularies() {
             vocabList.push({ word: vocab2, score: 5 });
             vocabList.push({ word: vocab3, score: 5 });
             localStorage.setItem('vocabList', JSON.stringify(vocabList));
-            document.getElementById('modalFirstVocab').style.display = 'none';
+            modalFirstVocab.style.display = 'none';
             setupEventListeners();
             loadNextQuestion();
         } else {
@@ -268,6 +316,7 @@ function promptInitialVocabularies() {
 
 function setupEventListeners() {
     restartButton.addEventListener('click', restartTraining);
+    resetAppButton.addEventListener('click', resetApp);
     document.getElementById('addVocab').addEventListener('click', addVocab);
     document.getElementById('skipVocab').addEventListener('click', skipVocab);
     submitButton.addEventListener('click', submitAnswer);
@@ -301,15 +350,21 @@ async function loadNextQuestion() {
         userAnswerElement.style.display = 'none';
         document.getElementById('skipVocab').style.display = 'none';
         restartButton.style.display = 'inline-block';
+        resetAppButton.style.display = 'inline-block';
         return;
     }
 
     currentVocab = selectRandomVocab();
+    if (!currentVocab) {
+        console.error('No vocabulary available to select.');
+        return;
+    }
     currentTask = await generateTask(currentVocab.word);
     taskElement.innerHTML = currentTask;
 }
 
 function getHighScoreVocabs() {
+    if (vocabList.length === 0) return [];
     const maxScore = Math.max(...vocabList.map(v => v.score));
     return vocabList.filter(v => v.score >= maxScore - 2 && v.score >= 1);
 }
@@ -334,6 +389,7 @@ function restartTraining() {
     userAnswerElement.style.display = 'block';
     document.getElementById('skipVocab').style.display = 'inline-block';
     restartButton.style.display = 'none';
+    resetAppButton.style.display = 'none';
 
     loadNextQuestion();
 }
@@ -417,6 +473,11 @@ User's answer: ${userAnswer} - if the user doesn't know the answer, provide deta
 
 function adjustScore(correct) {
     const vocabIndex = vocabList.findIndex(v => v.word === currentVocab.word);
+    if (vocabIndex === -1) {
+        console.error('Current vocabulary not found in the list.');
+        return;
+    }
+
     if (correct === true) {
         vocabList[vocabIndex].score -= 1;
     } else if (correct === false) {
@@ -428,6 +489,10 @@ function adjustScore(correct) {
 
 function skipVocab() {
     const vocabIndex = vocabList.findIndex(v => v.word === currentVocab.word);
+    if (vocabIndex === -1) {
+        console.error('Current vocabulary not found in the list.');
+        return;
+    }
     vocabList[vocabIndex].score = 0;
     localStorage.setItem('vocabList', JSON.stringify(vocabList));
     loadNextQuestion();
@@ -442,34 +507,58 @@ function addVocab() {
     }
 }
 
+function resetApp() {
+    const confirmation = confirm(uiText.resetAppConfirmation);
+    if (confirmation) {
+        localStorage.clear();
+        location.reload();
+    }
+}
+
 async function callChatGPTAPI(systemPrompt, userPrompt) {
     const apiKey = localStorage.getItem('apiKey');
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-            model: 'gpt-4',
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: userPrompt }
-            ]
-        })
-    });
-    const data = await response.json();
-    let content = data.choices[0].message.content;
+    if (!apiKey) {
+        console.error('API Key is missing.');
+        return '';
+    }
 
-    content = content.replace(/^```(?:json)?\n?/, '');
-    content = content.replace(/\n?```$/, '');
-    content = content.replace(/\\"/g, "'");
-    content = content.replace(/\\`/g, "'");
+    try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-4',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ]
+            })
+        });
 
-    return content;
+        if (!response.ok) {
+            throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        let content = data.choices[0].message.content;
+
+        content = content.replace(/^```(?:json)?\n?/, '');
+        content = content.replace(/\n?```$/, '');
+        content = content.replace(/\\"/g, "'");
+        content = content.replace(/\\`/g, "'");
+
+        return content;
+    } catch (error) {
+        console.error('Error calling OpenAI API:', error);
+        return '';
+    }
 }
 
 function markdownToHTML(markdown) {
+    if (!markdown) return '';
     markdown = markdown.replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>');
     markdown = markdown.replace(/(\*|_)(.*?)\1/g, '<em>$2</em>');
     markdown = markdown.replace(/(^|\n)(\d+)\. (.+)/g, function (match, newline, number, item) {
@@ -497,3 +586,4 @@ function enableVocabClick() {
         });
     });
 }
+

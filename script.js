@@ -243,12 +243,20 @@ function updateUIElements() {
 
 async function validateApiKey(apiKey) {
     try {
-        const response = await fetch('https://api.openai.com/v1/models', {
-            method: 'GET',
+
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            }
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-4',
+                messages: [
+                    { role: 'system', content: 'reply to ping with pong' },
+                    { role: 'user', content: 'ping' }
+                ]
+            })
         });
 
         if (response.ok) {

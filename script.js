@@ -331,7 +331,7 @@ async function requestApiKey() {
                     saveApiKeyButton.disabled = false;
                 }
             } else {
-                alert('The API key you entered is invalid. Please check your OpenAI credit balance and the key itself.');
+                alert(`The API key you entered is invalid. Please check your OpenAI credit balance and the key itself.\n\nA quick explanation what happened: The app tried to use your API key with OpenAI to validate the connection. Without a valid key, the app won't work. But the response was invalid. Either you have a typo in the key or you have no credit balance on your OpenAI developer account. Both can only be fixed on your end...`);
                 // Setze den Button-Text zurück
                 saveApiKeyButton.textContent = 'Save';
                 saveApiKeyButton.disabled = false;

@@ -1,6 +1,6 @@
 // script.js
 
-const version = 'Version 0.1b'
+const version = 'Version 0.1c - Multi-Vocab Input'
 
 // Utility function to convert a string to ArrayBuffer
 function strToArrayBuffer(str) {
@@ -360,18 +360,6 @@ function requestUserLanguage() {
 
             modalUserLang.style.display = 'none';
 
-            // Check if the translated UI text is already in localStorage
-            const storedUIText = localStorage.getItem(`uiText_${language}`);
-            if (storedUIText) {
-                uiText = JSON.parse(storedUIText);
-            } else {
-                // Translate UI text and store it
-                await translateUIText(language);
-            }
-
-            // Note: Do NOT call updateUIElements here
-            // It will be called inside initializeApp after DOM elements are set
-
             initializeApp();
         }
     });
@@ -411,9 +399,24 @@ if (!storedApiKey) {
 }
 
 async function initializeApp() {
+
     // Retrieve languages from localStorage
     const userLanguage = localStorage.getItem('userLanguage');
     const trainingLanguage = localStorage.getItem('trainingLanguage');
+
+    const lastVersion = localStorage.getItem('version');
+    if (version !== lastVersion) {
+        localStorage.setItem('version', version);
+        localStorage.removeItem(`uiText_${userLanguage}`);
+    }
+
+    const UIText = localStorage.getItem(`uiText_${userLanguage}`);
+            if (UIText) {
+                uiText = JSON.parse(UIText);
+            } else {
+                // Translate UI text and store it
+                await translateUIText(userLanguage);
+            }
 
     // Ensure languages are available
     if (!userLanguage || !trainingLanguage) {
@@ -765,13 +768,16 @@ function addVocab() {
     cancelAddVocabButton.replaceWith(cancelAddVocabButton.cloneNode(true));
 
     document.getElementById('saveAddVocab').addEventListener('click', () => {
-        const newVocab = document.getElementById('addVocabInput').value.trim();
-        if (newVocab) {
-            vocabList.push({ word: newVocab, score: 5 });
+        const inputText = document.getElementById('addVocabInput').value.trim();
+        if (inputText) {
+            const words = inputText.split('\n').map(word => word.trim()).filter(word => word);
+            words.forEach(newVocab => {
+                vocabList.push({ word: newVocab, score: 5 });
+            });
             localStorage.setItem('vocabList', JSON.stringify(vocabList));
             modalAddVocab.style.display = 'none';
         } else {
-            alert('Please enter a valid vocabulary item.');
+            alert('Please enter valid vocabulary items.');
         }
     });
 

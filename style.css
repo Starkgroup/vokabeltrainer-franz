@@ -95,9 +95,9 @@ main {
     min-height: 5.5em;
 }
 
-#userAnswer {
+textarea {
     width: calc(100vw - 60px);
-    max-width: calc(600px - 20px);
+    max-width: 100%;
     padding: 10px;
     font-size: 16px;
     height: 5.5em;
